@@ -1,0 +1,7 @@
+[
+  { "id": 1, "question": "Which of these is NOT a pillar of OOP?", "options": ["Encapsulation", "Polymorphism", "Compilation", "Inheritance"], "answer": 2 },
+  { "id": 2, "question": "What is the size of 'int' data type in Java?", "options": ["16-bit", "32-bit", "64-bit", "8-bit"], "answer": 1 },
+  { "id": 3, "question": "Which keyword is used to inherit a class in Java?", "options": ["extends", "implements", "inherits", "using"], "answer": 0 },
+  { "id": 4, "question": "Which of these is used to handle exceptions in Java?", "options": ["do-while", "try-catch", "if-else", "for-each"], "answer": 1 },
+  { "id": 5, "question": "Which memory area stores objects in Java?", "options": ["Stack", "Registry", "Heap", "Cache"], "answer": 2 }
+]
