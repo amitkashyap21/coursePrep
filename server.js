@@ -5,36 +5,52 @@ const fs = require('fs');
 const app = express();
 const PORT = 3000;
 
-// Path for users.json
+// =====================
+// VIEW ENGINE (EJS)
+// =====================
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+
+// =====================
+// USERS FILE PATH
+// =====================
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 
-// Middleware
+
+// =====================
+// MIDDLEWARE
+// =====================
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 
 // =====================
 // PAGE ROUTES
 // =====================
 
-// First Page (Home)
+// Home Page
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'firstpage.html'));
+    res.render('firstpage');
 });
+
 
 // Login Page
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'login.html'));
+    res.render('login');
 });
+
 
 // Register Page
 app.get('/register', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'register.html'));
+    res.render('register');
 });
+
 
 // Forgot Password Page
 app.get('/forgot-password', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'forgot-password.html'));
+    res.render('forgot-password');
 });
 
 
@@ -109,10 +125,14 @@ app.post('/api/login', (req, res) => {
 
         if (user) {
 
-            // Redirect to first page after login
+            // redirect after login
             res.redirect('/');
 
-        } 
+        } else {
+
+            res.send("Invalid username or password <a href='/login'>Try Again</a>");
+
+        }
 
     });
 
