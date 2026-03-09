@@ -12,14 +12,16 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // =====================
-// USERS FILE SETUP
+// DATA FILES SETUP
 // =====================
 const DATA_DIR = path.join(__dirname, 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const MARKS_FILE = path.join(DATA_DIR, 'marks.json');
 
-// Ensure data directory and users.json exist
+// Ensure directories and files exist
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
 if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, JSON.stringify([]));
+if (!fs.existsSync(MARKS_FILE)) fs.writeFileSync(MARKS_FILE, JSON.stringify([]));
 
 // =====================
 // MIDDLEWARE
@@ -28,17 +30,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Helper function to get users
-const getUsers = () => {
-    const data = fs.readFileSync(USERS_FILE, 'utf8');
-    return JSON.parse(data || "[]");
-};
+// Helpers
+const getUsers = () => JSON.parse(fs.readFileSync(USERS_FILE, 'utf8') || "[]");
+const getMarks = () => JSON.parse(fs.readFileSync(MARKS_FILE, 'utf8') || "[]");
 
-// Helper to generate 6 backup codes
 const generateBackupCodes = () => {
     let codes = [];
     for (let i = 0; i < 6; i++) {
-        // Generates an 8-character random string
         codes.push(Math.random().toString(36).substring(2, 10).toUpperCase());
     }
     return codes;
@@ -48,41 +46,106 @@ const generateBackupCodes = () => {
 // PAGE ROUTES
 // =====================
 
-app.get('/', (req, res) => res.render('firstpage'));
-app.get('/login', (req, res) => res.render('login'));
-app.get('/register', (req, res) => res.render('register'));
-app.get('/forgot-password', (req, res) => res.render('forgot-password'));
+// HOME: Now properly handles the header state
+app.get('/', (req, res) => {
+    const { user, email } = req.query;
+    res.render('firstpage', { 
+        username: user || null, 
+        email: email || null 
+    });
+});
+
+// LOGIN/REGISTER: Pass nulls so header doesn't crash
+app.get('/login', (req, res) => res.render('login', { username: null, email: null }));
+app.get('/register', (req, res) => res.render('register', { username: null, email: null }));
+app.get('/forgot-password', (req, res) => res.render('forgot-password', { username: null, email: null }));
+
+// 1. Profile Route
+app.get('/profile', (req, res) => {
+    const { user, email } = req.query;
+    if (!user) return res.redirect('/login');
+
+    const allMarks = getMarks();
+    const userHistory = allMarks.filter(m => m.username === user);
+
+    res.render('profile', { 
+        username: user, 
+        email: email, 
+        marks: userHistory 
+    });
+});
+
+// 2. Topics Selection Route
+app.get('/questions', (req, res) => {
+    const { user, email } = req.query;
+    if (!user) return res.redirect('/login');
+
+    const files = fs.readdirSync(DATA_DIR);
+    const topics = files
+        .filter(f => f.endsWith('.json') && f !== 'users.json' && f !== 'marks.json')
+        .map(f => f.replace('.json', ''));
+
+    res.render('topics', { 
+        topics: topics, 
+        username: user, 
+        email: email 
+    });
+});
+
+// 3. Quiz Route
+app.get('/quiz/:topic', (req, res) => {
+    const { topic } = req.params;
+    const { user, email } = req.query;
+    const filePath = path.join(DATA_DIR, `${topic}.json`);
+
+    if (!fs.existsSync(filePath)) return res.redirect(`/questions?user=${user}&email=${email}`);
+
+    const allQuestions = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const shuffled = allQuestions.sort(() => 0.5 - Math.random());
+    const selectedQuestions = shuffled.slice(0, 5);
+
+    res.render('quiz', { 
+        topic, 
+        questions: selectedQuestions, 
+        username: user, 
+        email: email 
+    });
+});
 
 // =====================
-// SIGNUP API
+// API ROUTES
 // =====================
+
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
+    const users = getUsers();
+    const user = users.find(u => u.email === email && u.password === password);
+
+    if (user) {
+        // SUCCESS: Redirect to HOME so the header shows "Profile"
+        res.redirect(`/?user=${encodeURIComponent(user.username)}&email=${encodeURIComponent(user.email)}`);
+    } else {
+        res.status(401).send("Invalid email or password <a href='/login'>Try Again</a>");
+    }
+});
 
 app.post('/register', (req, res) => {
-    const { name, email, password } = req.body; // Using name/email as per your EJS
+    const { name, email, password } = req.body;
     const users = getUsers();
 
-    const userExists = users.find(u => u.email === email);
-    if (userExists) {
+    if (users.find(u => u.email === email)) {
         return res.status(400).send("User already exists! <a href='/register'>Try again</a>");
     }
 
     const backupCodes = generateBackupCodes();
-    
-    users.push({ 
-        username: name, 
-        email: email, 
-        password: password, 
-        backupCodes: backupCodes 
-    });
-
+    users.push({ username: name, email, password, backupCodes });
     fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 
-    // Render a success page showing codes (or send as simple HTML for now)
     res.send(`
         <div style="font-family: sans-serif; padding: 50px; text-align: center;">
             <h2 style="color: #0f3d2e;">Registration Successful!</h2>
-            <p>Please save these <b>6 Backup Codes</b>. You will need them if you forget your password.</p>
-            <div style="background: #f4f4f4; padding: 20px; display: inline-block; border: 2px dashed #0f3d2e; font-size: 20px; letter-spacing: 2px;">
+            <p>Save these <b>6 Backup Codes</b> to reset your password later:</p>
+            <div style="background: #f4f4f4; padding: 20px; border: 2px dashed #0f3d2e; font-size: 20px; display: inline-block; margin: 20px 0;">
                 ${backupCodes.join('<br>')}
             </div>
             <p><a href="/login" style="color: #0f3d2e; font-weight: bold;">Proceed to Login</a></p>
@@ -90,64 +153,73 @@ app.post('/register', (req, res) => {
     `);
 });
 
-// =====================
-// LOGIN API
-// =====================
+app.post('/submit-quiz', (req, res) => {
+    const { username, topic, score, results } = req.body;
+    const allMarks = getMarks();
 
-app.post('/login', (req, res) => {
-    const { email, password } = req.body;
-    const users = getUsers();
+    allMarks.push({
+        username,
+        topic,
+        score,
+        results,
+        date: new Date().toLocaleString()
+    });
 
-    const user = users.find(u => u.email === email && u.password === password);
-
-    if (user) {
-        res.redirect('/');
-    } else {
-        res.status(401).send("Invalid email or password <a href='/login'>Try Again</a>");
-    }
+    fs.writeFileSync(MARKS_FILE, JSON.stringify(allMarks, null, 2));
+    res.json({ success: true });
 });
 
-// =====================
-// FORGOT PASSWORD API (AJAX SUPPORT)
-// =====================
+app.post('/api/delete-account', (req, res) => {
+    // 1. Capture the data sent from profile.ejs
+    const emailToDelete = req.body.email;
+    const userToDelete = req.body.username;
+
+    if (!emailToDelete || !userToDelete) {
+        return res.status(400).json({ success: false, message: "Missing required data" });
+    }
+
+    console.log(`Processing deletion for: ${userToDelete}`);
+
+    // 2. Remove from users.json
+    let users = getUsers();
+    const updatedUsers = users.filter(u => u.email !== emailToDelete);
+    fs.writeFileSync(USERS_FILE, JSON.stringify(updatedUsers, null, 2));
+
+    // 3. Remove from marks.json (The Bulletproof Filter)
+    let allMarks = getMarks();
+    
+    // We normalize both strings: remove spaces and make lowercase
+    const updatedMarks = allMarks.filter(m => {
+        const storedName = m.username.trim().toLowerCase();
+        const targetName = userToDelete.trim().toLowerCase();
+        return storedName !== targetName;
+    });
+
+    console.log(`Before: ${allMarks.length} records | After: ${updatedMarks.length} records`);
+
+    fs.writeFileSync(MARKS_FILE, JSON.stringify(updatedMarks, null, 2));
+
+    res.json({ success: true });
+});
 
 app.post('/forgot-password', (req, res) => {
     const { email, code, newPassword } = req.body;
     let users = getUsers();
-
     const userIndex = users.findIndex(u => u.email === email);
 
-    if (userIndex === -1) {
-        return res.status(404).json({ message: "User not found." });
-    }
+    if (userIndex === -1) return res.status(404).json({ message: "User not found." });
 
     const user = users[userIndex];
     const codeIndex = user.backupCodes.indexOf(code.toUpperCase());
 
     if (codeIndex !== -1) {
-        // Update password and remove the used code
         user.password = newPassword;
-        user.backupCodes.splice(codeIndex, 1);
-
+        user.backupCodes.splice(codeIndex, 1); // Remove used code
         fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-        
-        // Respond based on request type (AJAX vs Form)
-        if (req.headers['content-type'] === 'application/json') {
-            return res.json({ message: "Success" });
-        }
-        res.send("Password updated! <a href='/login'>Login now</a>");
+        res.json({ message: "Success" });
     } else {
-        if (req.headers['content-type'] === 'application/json') {
-            return res.status(400).json({ message: "Invalid or used backup code." });
-        }
-        res.send("Invalid backup code. <a href='/forgot-password'>Try again</a>");
+        res.status(400).json({ message: "Invalid code." });
     }
 });
 
-// =====================
-// START SERVER
-// =====================
-
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server: http://localhost:${PORT}`));

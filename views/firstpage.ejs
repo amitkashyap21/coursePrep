@@ -121,8 +121,13 @@ body{
     </p>
 
     <div class="buttons">
-        <a href="/" class="primary-btn">Get Started</a>
-        <a href="/login" class="secondary-btn">Login</a>
+        <% if (typeof username !== 'undefined' && username) { %>
+            <a href="/questions?user=<%= username %>&email=<%= email %>" class="primary-btn">Go to Tests</a>
+            <a href="/profile?user=<%= username %>&email=<%= email %>" class="secondary-btn">My Profile</a>
+        <% } else { %>
+            <a href="/register" class="primary-btn">Get Started</a>
+            <a href="/login" class="secondary-btn">Login</a>
+        <% } %>
     </div>
 </div>
 

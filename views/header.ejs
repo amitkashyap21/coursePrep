@@ -7,63 +7,33 @@
 <title>CoursePrep - Interview Preparation</title>
 
 <style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family: Arial, sans-serif;
-}
-
-body{
-    background-color:#f4f7f6;
-    color:#222;
-}
-
-/* NAVBAR */
-.navbar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:20px 60px;
-    background-color:white;
-    box-shadow:0 2px 10px rgba(0,0,0,0.05);
-}
-
-.logo{
-    font-size:22px;
-    font-weight:bold;
-    color:#0f3d2e;
-}
-
-.nav-links a{
-    margin-left:25px;
-    text-decoration:none;
-    color:#0f3d2e;
-    font-weight:600;
-}
-
-.nav-links a:hover{
-    color:#1b5e4b;
-}
-
+    .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 60px;
+        background: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .logo { font-size: 22px; font-weight: bold; color: #0f3d2e; text-decoration: none; }
+    .nav-links a { margin-left: 25px; text-decoration: none; color: #0f3d2e; font-weight: 600; }
+    .nav-links a:hover { color: #1b5e4b; }
+    .logout { color: #d9534f !important; }
 </style>
 
-</head>
-
-<body>
-
-<!-- NAVBAR -->
-<div class="navbar">
-
-    <div class="logo">
-        CoursePrep
-    </div>
+<nav class="navbar">
+    <a href="/<%= (typeof username !== 'undefined' && username) ? '?user=' + username + '&email=' + email : '' %>" class="logo">CoursePrep</a>
 
     <div class="nav-links">
-        <a href="/">Home</a>
-        <a href="/login">Login</a>
-        <a href="/register">Register</a>
-    </div>
+        <a href="/<%= (typeof username !== 'undefined' && username) ? '?user=' + username + '&email=' + email : '' %>">Home</a>
 
-</div>
+        <% if (typeof username !== 'undefined' && username) { %>
+            <a href="/questions?user=<%= username %>&email=<%= email %>">Tests</a>
+            <a href="/profile?user=<%= username %>&email=<%= email %>">Profile</a>
+            <a href="/login" class="logout">Logout</a>
+        <% } else { %>
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+        <% } %>
+    </div>
+</nav>

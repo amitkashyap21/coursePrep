@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Topic | CoursePrep</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <%- include('header') %>
+    <style>
+        :root {
+            --primary-dark: #0f3d2e;
+            --secondary-green: #1b5e4b;
+            --bg-light: #f4f7f6;
+        }
+
+        body {
+            background-color: var(--bg-light);
+        }
+
+        .topics-container {
+            max-width: 1000px;
+            margin: 60px auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .topics-container h1 {
+            font-size: 32px;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+
+        .topics-container p {
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .topic-card {
+            background: white;
+            padding: 40px 20px;
+            border-radius: 15px;
+            text-decoration: none;
+            color: var(--primary-dark);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1.5px solid transparent;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .topic-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-dark);
+            box-shadow: 0 8px 25px rgba(15, 61, 46, 0.15);
+        }
+
+        .topic-icon {
+            font-size: 40px;
+            color: var(--secondary-green);
+        }
+
+        .topic-card h3 {
+            font-size: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-btn {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--secondary-green);
+        }
+
+        @media (max-width: 600px) {
+            .topics-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="topics-container">
+    <h1>Preparation Topics</h1>
+    <p>Select a subject to test your knowledge with 5 random questions.</p>
+
+    <div class="topics-grid">
+        <% topics.forEach(topic => { %>
+            <a href="/quiz/<%= topic %>?user=<%= username %>&email=<%= email %>" class="topic-card">
+                <div class="topic-icon">
+                    <i class="fa-solid fa-code"></i>
+                </div>
+                <h3><%= topic %></h3>
+                <span class="start-btn">Start Quiz <i class="fa-solid fa-arrow-right"></i></span>
+            </a>
+        <% }) %>
+    </div>
+
+    <% if (topics.length === 0) { %>
+        <div style="background: white; padding: 40px; border-radius: 15px;">
+            <i class="fa-solid fa-folder-open" style="font-size: 50px; color: #ccc;"></i>
+            <p style="margin-top: 20px;">No topic files found in the data folder.</p>
+        </div>
+    <% } %>
+</div>
+
+<%- include('footer') %>
+
+</body>
+</html>
