@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CoursePrep Login</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <%- include('header') %>
+        <style>
+            /* ... (Keep all your existing CSS exactly as it is) ... */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                background-color: #f5f5f5;
+            }
+
+            .container {
+                display: flex;
+                height: 100vh;
+                max-width: 1400px;
+                margin: 0 auto;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            }
+
+            .left {
+                width: 50%;
+                padding: 60px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                background-color: white;
+            }
+
+            .right {
+                width: 50%;
+                background: linear-gradient(135deg, #0f3d2e, #1b5e4b);
+                color: white;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                align-items: center;
+                padding: 60px 40px;
+                position: relative;
+            }
+
+            .left h2 {
+                font-size: 36px;
+                color: #1a1a1a;
+                margin-bottom: 15px;
+                font-weight: 600;
+            }
+
+            .left>p {
+                color: #666;
+                font-size: 16px;
+                margin-bottom: 40px;
+                max-width: 400px;
+                line-height: 1.6;
+            }
+
+            form {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                max-width: 380px;
+            }
+
+            label {
+                font-size: 14px;
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 6px;
+            }
+
+            input {
+                padding: 14px 16px;
+                margin-bottom: 20px;
+                border-radius: 10px;
+                border: 1.5px solid #e0e0e0;
+                font-size: 15px;
+                transition: all 0.3s ease;
+            }
+
+            input:focus {
+                outline: none;
+                border-color: #0f3d2e;
+                box-shadow: 0 0 0 3px rgba(15, 61, 46, 0.1);
+            }
+
+            button {
+                padding: 16px;
+                border: none;
+                border-radius: 12px;
+                background-color: #0f3d2e;
+                color: white;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            button:hover {
+                background-color: #145a44;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(15, 61, 46, 0.3);
+            }
+
+            .register {
+                margin-top: 30px;
+                color: #0f3d2e;
+                text-decoration: none;
+                font-size: 15px;
+                font-weight: 500;
+            }
+
+            .contact-details span {
+                background: rgba(255, 255, 255, 0.1);
+                padding: 12px 25px;
+                border-radius: 50px;
+                backdrop-filter: blur(5px);
+            }
+
+            /* ... (I've kept the rest of your CSS logic) ... */
+        </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="left">
+            <h2>Welcome Back!</h2>
+            <p>Sign in to access your dashboard and continue optimizing your Interview Process.</p>
+
+            <form action="/login" method="POST">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+                <a href="/forgot-password" class="forgot"
+                    style="text-align: right; font-size: 14px; margin-bottom: 25px; color: #0f3d2e; text-decoration: none;">Forgot
+                    password?</a>
+
+                <button type="submit">Login</button>
+            </form>
+
+            <a href="/register" class="register">Don't have an account? Register here</a>
+        </div>
+
+        <div class="right" style="text-align: center;">
+            <div class="welcome-content"
+                style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                <p style="font-size: 28px; font-weight: 700; margin-bottom: 15px;">Welcome to the Innovative World of
+                    QA!</p>
+                <p style="font-size: 18px; opacity: 0.9;">This website will help you dive into the world of innovation,
+                    Inspiration and Creativity</p>
+            </div>
+
+            <div class="contact" style="margin-top: auto; padding-bottom: 20px;">
+                <p style="font-weight: 600; margin-bottom: 20px;">Contact Us</p>
+                <div class="contact-details" style="display: flex; gap: 20px; justify-content: center;">
+                    <span style="display: flex; align-items: center; gap: 10px; font-size: 14px;">
+                        <i class="fas fa-phone"></i> 01234-56789
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 10px; font-size: 14px;">
+                        <i class="fas fa-envelope"></i> Helpcenter@gmail.com
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <%- include('footer') %>
+
+    <script src="/js/login.js"></script>
+</body>
+
+</html>

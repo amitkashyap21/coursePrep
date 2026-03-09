@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CourseIQ - Interview Preparation</title>
+<title>CoursePrep - Interview Preparation</title>
+
+<%- include('header') %>
 
 <style>
 
@@ -17,29 +19,6 @@
 body{
     background-color:#f4f7f6;
     color:#222;
-}
-
-/* NAVBAR */
-.navbar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:20px 60px;
-    background-color:white;
-    box-shadow:0 2px 10px rgba(0,0,0,0.05);
-}
-
-.logo{
-    font-size:22px;
-    font-weight:bold;
-    color:#0f3d2e;
-}
-
-.nav-links a{
-    margin-left:25px;
-    text-decoration:none;
-    color:#0f3d2e;
-    font-weight:600;
 }
 
 /* HERO SECTION */
@@ -126,43 +105,25 @@ body{
     color:#555;
 }
 
-/* FOOTER */
-.footer{
-    text-align:center;
-    padding:20px;
-    background-color:#0f3d2e;
-    color:white;
-    margin-top:40px;
-}
-
 </style>
 </head>
 
 <body>
 
-<!-- NAVBAR -->
-<div class="navbar">
-    <div class="logo">CourseIQ</div>
-    <div class="nav-links">
-        <a href="login.html">Login</a>
-        <a href="register.html">Register</a>
-    </div>
-</div>
-
 <!-- HERO SECTION -->
 <div class="hero">
     <h1>Personalized Interview Preparation Platform</h1>
     <p>
-        CourseIQ is a role-based web application that generates
+        CoursePrep is a role-based web application that generates
         customized interview questions based on your academic stream
         or competitive exam. Prepare smarter with tailored content
         designed specifically for your goals.
     </p>
 
     <div class="buttons">
-    <a href="firstpage.html" class="primary-btn">Get Started</a>
-    <a href="/login" class="secondary-btn">Login</a>
-</div>
+        <a href="/" class="primary-btn">Get Started</a>
+        <a href="/login" class="secondary-btn">Login</a>
+    </div>
 </div>
 
 <!-- FEATURES -->
@@ -201,10 +162,7 @@ body{
     </div>
 </div>
 
-<!-- FOOTER -->
-<div class="footer">
-    © 2026 CourseIQ | Designed for Smarter Interview Preparation
-</div>
+<%- include('footer') %>
 
 </body>
 </html>

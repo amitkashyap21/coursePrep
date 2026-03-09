@@ -1,28 +1,36 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const topic = urlParams.get('topic');
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.querySelector('form');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const loginBtn = document.querySelector('button');
 
-    try {
-        const response = await fetch(`/api/questions?topic=${topic}`);
-        const questions = await response.json();
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            // 1. Basic Client-Side Validation
+            const emailValue = emailInput.value.trim();
+            const passwordValue = passwordInput.value;
 
-        const list = document.getElementById('question-list');
-        list.innerHTML = questions.map((q, qIndex) => `
-            <div class="q-card">
-                <span class="q-num">Question 0${qIndex + 1}</span>
-                <h3>${q.question}</h3>
-                <div class="options-container">
-                    ${q.options.map((opt, optIndex) => `
-                        <label class="option-label">
-                            <input type="radio" name="q${q.id}" value="${optIndex}" required>
-                            <span class="custom-radio"></span>
-                            ${opt}
-                        </label>
-                    `).join('')}
-                </div>
-            </div>
-        `).join('');
-    } catch (err) {
-        console.error("Error:", err);
+            if (!emailValue || !passwordValue) {
+                e.preventDefault();
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            // 2. Simple Email Format Check
+            const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+            if (!emailValue.match(emailPattern)) {
+                e.preventDefault();
+                alert("Please enter a valid email address.");
+                return;
+            }
+
+            // 3. Visual Feedback (Loading State)
+            loginBtn.innerText = "Authenticating...";
+            loginBtn.style.opacity = "0.7";
+            loginBtn.style.cursor = "not-allowed";
+            
+            console.log(`Attempting login for: ${emailValue}`);
+            // The form will now proceed to POST to your app.js /login route
+        });
     }
 });

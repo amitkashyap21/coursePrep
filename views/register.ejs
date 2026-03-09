@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Register | CoursePrep</title>
+    <%- include('header') %>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* LEFT SIDE */
+        .left {
+            width: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 40px;
+        }
+
+        .form-box {
+            width: 100%;
+            max-width: 380px;
+        }
+
+        .form-box h2 {
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .form-box p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input {
+            padding: 14px 16px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 1.5px solid #e0e0e0;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #0f3d2e;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(15, 61, 46, 0.1);
+        }
+
+        /* Added a small note for the backup codes */
+        .info-note {
+            font-size: 12px;
+            color: #0f3d2e;
+            background: rgba(15, 61, 46, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 3px solid #0f3d2e;
+        }
+
+        button {
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background-color: #0f3d2e;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #145a44;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(15, 61, 46, 0.3);
+        }
+
+        .login-link {
+            margin-top: 25px;
+            font-size: 15px;
+            text-align: center;
+            color: #666;
+        }
+
+        .login-link a {
+            color: #0f3d2e;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        /* RIGHT SIDE */
+        .right {
+            width: 50%;
+            background: linear-gradient(135deg, #0f3d2e, #1b5e4b);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 60px;
+            position: relative;
+        }
+
+        .right h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .right p {
+            font-size: 18px;
+            line-height: 1.6;
+            max-width: 450px;
+            opacity: 0.9;
+        }
+
+        .contact {
+            margin-top: auto;
+        }
+
+        .contact h3 {
+            margin-bottom: 20px;
+            font-size: 20px;
+            letter-spacing: 1px;
+        }
+
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .contact-details span {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 15px;
+            backdrop-filter: blur(5px);
+            width: fit-content;
+        }
+
+        @media (max-width: 968px) {
+            .container { flex-direction: column; height: auto; }
+            .left, .right { width: 100%; padding: 40px 20px; }
+            .right { min-height: 400px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="left">
+            <div class="form-box">
+                <h2>Create Account</h2>
+                <p>
+                    Join us today and start preparing for your
+                    dream interviews with confidence.
+                </p>
+
+                <div class="info-note">
+                    <i class="fas fa-shield-alt"></i> 
+                    After registering, you will receive <b>6 One-Time Backup Codes</b> to recover your account if you forget your password.
+                </div>
+
+                <form action="/register" method="POST">
+                    <label for="name">Username</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your username" required>
+
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Create a password" required>
+
+                    <button type="submit">Register & Get Backup Codes</button>
+                </form>
+
+                <div class="login-link">
+                    Already have an account?
+                    <a href="/login">Login here</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="right">
+            <div>
+                <h1>Start Your Interview Journey</h1>
+                <p>
+                    Build your profile, practice interview questions,
+                    and get ready to land your dream job.
+                </p>
+            </div>
+
+            <div class="contact">
+                <h3>Contact Us</h3>
+                <div class="contact-details">
+                    <span>📞 +91 98765 43210</span>
+                    <span>📧 support@interviewhub.com</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <%- include('footer') %>
+    <script src="/js/register.js"></script>
+</body>
+
+</html>
