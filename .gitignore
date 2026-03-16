@@ -139,3 +139,5 @@ vite.config.ts.timestamp-*
 data/users.json
 data/marks.json
 uploads/
+
+*.zip
