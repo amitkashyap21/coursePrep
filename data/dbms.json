@@ -1,7 +1,68 @@
 [
-  { "id": 1, "question": "What is a primary key?", "options": ["A key that allows duplicates", "A unique identifier for a record", "A key used for encryption", "A foreign link"], "answer": 1 },
-  { "id": 2, "question": "Which SQL command is used to remove all records from a table without deleting the table structure?", "options": ["DELETE", "REMOVE", "DROP", "TRUNCATE"], "answer": 3 },
-  { "id": 3, "question": "What does ACID stand for in DBMS?", "options": ["Atomicity, Consistency, Isolation, Durability", "Accuracy, Consistency, Integrity, Data", "Atomicity, Centralization, Isolation, Database", "Access, Control, Integrity, Durability"], "answer": 0 },
-  { "id": 4, "question": "Which join returns all records when there is a match in either left or right table?", "options": ["Inner Join", "Left Join", "Full Outer Join", "Right Join"], "answer": 2 },
-  { "id": 5, "question": "What is a 'Foreign Key'?", "options": ["A key from a different database", "A field that identifies a record in another table", "A secret key", "A key used for sorting"], "answer": 1 }
+  {
+    "id": 1,
+    "question": "What is a primary key?",
+    "options": [
+      "A key that allows duplicates",
+      "A unique identifier for a record",
+      "A key used for encryption",
+      "A foreign link"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 2,
+    "question": "Which SQL command is used to remove all records from a table without deleting the table structure?",
+    "options": [
+      "DELETE",
+      "REMOVE",
+      "DROP",
+      "TRUNCATE"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 3,
+    "question": "What does ACID stand for in DBMS?",
+    "options": [
+      "Atomicity, Consistency, Isolation, Durability",
+      "Accuracy, Consistency, Integrity, Data",
+      "Atomicity, Centralization, Isolation, Database",
+      "Access, Control, Integrity, Durability"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 4,
+    "question": "Which join returns all records when there is a match in either left or right table?",
+    "options": [
+      "Inner Join",
+      "Left Join",
+      "Full Outer Join",
+      "Right Join"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 5,
+    "question": "What is a 'Foreign Key'?",
+    "options": [
+      "A key from a different database",
+      "A field that identifies a record in another table",
+      "A secret key",
+      "A key used for sorting"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 6,
+    "question": "Which SQL clause is used to filter the results of an aggregate function (such as AVG or COUNT) after the data has been grouped?",
+    "options": [
+      "WHERE",
+      "HAVING",
+      "GROUP FILTER",
+      "ORDER BY"
+    ],
+    "answer": 1
+  }
 ]

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 60px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .logo { font-size: 22px; font-weight: bold; color: #0f3d2e; text-decoration: none; }
+        .nav-links { display: flex; align-items: center; }
+        .nav-links a { margin-left: 25px; text-decoration: none; color: #0f3d2e; font-weight: 600; font-size: 15px; }
+        .nav-links a:hover { color: #1b5e4b; }
+        
+        .admin-pill {
+            background: #e8f5e9;
+            padding: 6px 15px;
+            border-radius: 20px;
+            color: #2e7d32 !important;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .logout { color: #d9534f !important; cursor: pointer; }
+    </style>
+</head>
+
+<nav class="navbar" id="mainNavbar" data-is-logged-in="<%= (typeof username !== 'undefined' && username) ? 'true' : 'false' %>">
+    <a href="/" class="logo">CoursePrep</a>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+
+        <% if (typeof username !== 'undefined' && username) { %>
+            
+            <% if (typeof role !== 'undefined' && role === 'admin') { %>
+                <a href="/admin-dashboard" class="admin-pill">
+                    <i class="fa-solid fa-screwdriver-wrench"></i> Admin Panel
+                </a>
+                <a href="/profile">System Stats</a>
+            <% } else { %>
+                <a href="/questions">Tests</a>
+                <a href="/profile">My Profile</a>
+            <% } %>
+
+            <a href="javascript:void(0)" onclick="confirmLogout()" class="logout">Logout</a>
+        <% } else { %>
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+        <% } %>
+    </div>
+</nav>
+
+
+
+<script>
+    /**
+     * 1. Manual Logout Confirmation
+     */
+    function confirmLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+            window.location.href = '/logout';
+        }
+    }
+
+    /**
+     * 2. Swipe Back / Browser History Guard
+     * We pull the 'loggedIn' status from the HTML attribute 
+     * so VS Code doesn't see EJS tags inside the script.
+     */
+    (function() {
+        const nav = document.getElementById('mainNavbar');
+        const isLoggedIn = nav.getAttribute('data-is-logged-in') === 'true';
+
+        if (isLoggedIn) {
+            // Create a "dummy" history point
+            history.pushState(null, null, location.href);
+
+            window.onpopstate = function () {
+                const userWantsLogout = confirm("Do you want to logout and close your session?");
+                
+                if (userWantsLogout) {
+                    window.location.href = '/logout';
+                } else {
+                    // Stay on the page by pushing the state back
+                    history.pushState(null, null, location.href);
+                }
+            };
+        }
+    })();
+</script>
