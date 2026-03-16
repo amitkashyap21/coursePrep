@@ -134,3 +134,8 @@ dist
 # Vite logs
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# CoursePrep Data
+data/users.json
+data/marks.json
+uploads/

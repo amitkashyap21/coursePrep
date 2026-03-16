@@ -122,8 +122,15 @@ body{
 
     <div class="buttons">
         <% if (typeof username !== 'undefined' && username) { %>
-            <a href="/questions?user=<%= username %>&email=<%= email %>" class="primary-btn">Go to Tests</a>
-            <a href="/profile?user=<%= username %>&email=<%= email %>" class="secondary-btn">My Profile</a>
+            
+            <% if (typeof role !== 'undefined' && role === 'admin') { %>
+                <a href="/admin-dashboard" class="primary-btn">Manage Platform</a>
+                <a href="/profile" class="secondary-btn">System Stats</a>
+            <% } else { %>
+                <a href="/questions" class="primary-btn">Go to Tests</a>
+                <a href="/profile" class="secondary-btn">My Profile</a>
+            <% } %>
+
         <% } else { %>
             <a href="/register" class="primary-btn">Get Started</a>
             <a href="/login" class="secondary-btn">Login</a>

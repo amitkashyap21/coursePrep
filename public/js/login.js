@@ -1,36 +1,38 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.querySelector('form');
-    const emailInput = document.getElementById('email');
+    const emailInput = document.getElementById('email'); // This is your 'identifier' field
     const passwordInput = document.getElementById('password');
     const loginBtn = document.querySelector('button');
 
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
-            // 1. Basic Client-Side Validation
-            const emailValue = emailInput.value.trim();
+            const identifierValue = emailInput.value.trim();
             const passwordValue = passwordInput.value;
 
-            if (!emailValue || !passwordValue) {
+            // 1. Basic Client-Side Validation
+            if (!identifierValue || !passwordValue) {
                 e.preventDefault();
                 alert("Please fill in all fields.");
                 return;
             }
 
-            // 2. Simple Email Format Check
+            // 2. Updated Validation: Check if it's a valid email OR a valid username
             const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
-            if (!emailValue.match(emailPattern)) {
+            const isEmail = identifierValue.match(emailPattern);
+            const isUsername = identifierValue.length >= 3; // Allowing usernames 3 chars or longer
+
+            if (!isEmail && !isUsername) {
                 e.preventDefault();
-                alert("Please enter a valid email address.");
+                alert("Please enter a valid email or username (min 3 characters).");
                 return;
             }
 
-            // 3. Visual Feedback (Loading State)
+            // 3. Visual Feedback
             loginBtn.innerText = "Authenticating...";
             loginBtn.style.opacity = "0.7";
             loginBtn.style.cursor = "not-allowed";
             
-            console.log(`Attempting login for: ${emailValue}`);
-            // The form will now proceed to POST to your app.js /login route
+            console.log(`Attempting login for: ${identifierValue}`);
         });
     }
 });
