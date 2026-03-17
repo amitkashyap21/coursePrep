@@ -1,68 +1,66 @@
-require('dotenv').config(); // MUST BE AT THE TOP
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const session = require('express-session');
 const multer = require('multer');
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+
+// Import Models
+const User = require('./models/User');
+const Mark = require('./models/Mark');
+const Question = require('./models/Question');
 
 const app = express();
 const PORT = 3000;
 
-// Setup Multer for temporary file uploads
+// =====================
+// DATABASE CONNECTION
+// =====================
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log('✅ Connected to MongoDB Atlas'))
+    .catch(err => console.error('❌ MongoDB Connection Error:', err));
+
 const upload = multer({ dest: 'uploads/' });
 
 // =====================
-// VIEW ENGINE (EJS)
+// VIEW ENGINE & MIDDLEWARE
 // =====================
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// =====================
-// DATA FILES SETUP
-// =====================
-const DATA_DIR = path.join(__dirname, 'data');
-const USERS_FILE = path.join(DATA_DIR, 'users.json');
-const MARKS_FILE = path.join(DATA_DIR, 'marks.json');
-
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
-if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, JSON.stringify([]));
-if (!fs.existsSync(MARKS_FILE)) fs.writeFileSync(MARKS_FILE, JSON.stringify([]));
-
-// =====================
-// MIDDLEWARE
-// =====================
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
-    secret: 'prepflow_secret_key',
+    secret: process.env.SESSION_SECRET || 'prepflow_secret_key',
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 3600000 } // 1 hour
 }));
 
-// Guard against "Back Button" viewing private data
+// Prevents users from going "Back" to secure pages after logout
 app.use((req, res, next) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     next();
 });
 
 // =====================
-// HELPERS
+// GLOBAL AUTH GUARD (The Gatekeeper)
 // =====================
-const getUsers = () => JSON.parse(fs.readFileSync(USERS_FILE, 'utf8') || "[]");
-const getMarks = () => JSON.parse(fs.readFileSync(MARKS_FILE, 'utf8') || "[]");
+app.use((req, res, next) => {
+    const publicPaths = ['/', '/login', '/register'];
+    const isPublic = publicPaths.includes(req.path);
+    const isStatic = req.path.startsWith('/public') || req.path.startsWith('/uploads');
 
-const generateBackupCodes = () => {
-    let codes = [];
-    for (let i = 0; i < 6; i++) {
-        codes.push(Math.random().toString(36).substring(2, 10).toUpperCase());
+    if (isPublic || isStatic || req.session.user) {
+        return next();
     }
-    return codes;
-};
+    res.redirect('/login');
+});
 
-// Middleware to protect Admin Routes
 const isAdmin = (req, res, next) => {
     if (req.session.user && req.session.user.role === 'admin') {
         next();
@@ -75,239 +73,205 @@ const isAdmin = (req, res, next) => {
 // PAGE ROUTES
 // =====================
 
-app.get('/', (req, res) => {
-    const user = req.session.user || {};
-    const allUsers = getUsers();
-    const allMarks = getMarks();
-    
-    // Count only students for the homepage stats
-    const studentCount = allUsers.filter(u => u.role !== 'admin').length;
-
-    res.render('firstpage', { 
-        username: user.username || null, 
-        email: user.email || null,
-        role: user.role || null,
-        stats: { 
-            totalUsers: studentCount, 
-            totalQuizzes: allMarks.length 
-        }
-    });
+app.get('/', async (req, res) => {
+    try {
+        const user = req.session.user || {};
+        const studentCount = await User.countDocuments({ role: 'student' });
+        const quizCount = await Mark.countDocuments();
+        res.render('firstpage', { 
+            username: user.username || null, 
+            email: user.email || null,
+            role: user.role || null,
+            stats: { totalUsers: studentCount, totalQuizzes: quizCount }
+        });
+    } catch (e) { res.status(500).send("Error loading home"); }
 });
 
-app.get('/login', (req, res) => res.render('login', { username: null, email: null }));
-app.get('/register', (req, res) => res.render('register', { username: null, email: null }));
-app.get('/forgot-password', (req, res) => res.render('forgot-password', { username: null, email: null }));
+app.get('/login', (req, res) => {
+    if (req.session.user) return res.redirect('/'); // Sends them home if logged in
+    res.render('login', { username: null, email: null });
+});
 
-app.get('/admin-dashboard', isAdmin, (req, res) => {
-    const users = getUsers();
+app.get('/register', (req, res) => {
+    if (req.session.user) {
+        return res.redirect('/');
+    }
+    res.render('register', { username: null, email: null });
+});
+
+app.get('/admin-dashboard', isAdmin, async (req, res) => {
+    const users = await User.find();
     res.render('admin', { 
-        username: req.session.user.username, 
-        email: req.session.user.email,
-        role: req.session.user.role,
+        ...req.session.user,
         users: users 
     });
 });
 
-app.get('/profile', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
-
+app.get('/profile', async (req, res) => {
     const { username, email, role } = req.session.user;
-    const allUsers = getUsers(); 
-    const allMarks = getMarks(); 
     
-    const studentCount = allUsers.filter(u => u.role !== 'admin').length;
-    const userHistory = (role === 'admin') ? [] : allMarks.filter(m => m.username === username);
+    // Re-verify user exists in DB
+    const userExists = await User.findOne({ email });
+    if (!userExists && role !== 'admin') {
+        return req.session.destroy(() => res.redirect('/login'));
+    }
 
-    const stats = {
-        totalUsers: studentCount, 
-        totalQuizzes: allMarks.length
-    };
+    const studentCount = await User.countDocuments({ role: 'student' });
+    const quizCount = await Mark.countDocuments();
+    // Fetch marks by EMAIL to ensure data integrity
+    const userHistory = (role === 'admin') ? [] : await Mark.find({ email }).sort({ _id: -1 });
 
     res.render('profile', { 
         username, email, role, 
         marks: userHistory,
-        stats: stats 
+        stats: { totalUsers: studentCount, totalQuizzes: quizCount } 
     });
 });
 
-app.get('/questions', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
-    const topics = fs.readdirSync(DATA_DIR)
-        .filter(f => f.endsWith('.json') && f !== 'users.json' && f !== 'marks.json')
-        .map(f => f.replace('.json', ''));
-    res.render('topics', { 
-        topics, 
-        username: req.session.user.username, 
-        email: req.session.user.email,
-        role: req.session.user.role 
-    });
+app.get('/questions', async (req, res) => {
+    const topics = await Question.distinct('topic');
+    res.render('topics', { topics, ...req.session.user });
 });
 
-app.get('/quiz/:topic', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
+app.get('/quiz/:topic', async (req, res) => {
     const { topic } = req.params;
-    const filePath = path.join(DATA_DIR, `${topic}.json`);
-    if (!fs.existsSync(filePath)) return res.redirect('/questions');
-
-    const allQuestions = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    const shuffled = allQuestions.sort(() => 0.5 - Math.random()).slice(0, 5);
-
-    res.render('quiz', { 
-        topic, 
-        questions: shuffled, 
-        username: req.session.user.username, 
-        email: req.session.user.email,
-        role: req.session.user.role 
-    });
+    const shuffled = await Question.aggregate([
+        { $match: { topic: topic.toLowerCase() } },
+        { $sample: { size: 5 } }
+    ]);
+    if (shuffled.length === 0) return res.redirect('/questions');
+    res.render('quiz', { topic, questions: shuffled, ...req.session.user });
 });
 
 // =====================
 // AUTH & ACCOUNT API
 // =====================
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     const { email: inputID, password: inputPass } = req.body; 
-    const users = getUsers();
 
-    // 1. FIRST CHECK: Does it match the secret .env admin?
-    const isSecretAdmin = (
-        (inputID === process.env.ADMIN_EMAIL || inputID === process.env.ADMIN_USERNAME) &&
-        inputPass === process.env.ADMIN_PASSWORD
-    );
+    let loggedInUser = null;
 
-    if (isSecretAdmin) {
-        req.session.user = { 
+    // 1. Check Secret Admin (.env)
+    if ((inputID === process.env.ADMIN_EMAIL || inputID === process.env.ADMIN_USERNAME) && 
+        inputPass === process.env.ADMIN_PASSWORD) {
+        loggedInUser = { 
             username: process.env.ADMIN_USERNAME, 
             email: process.env.ADMIN_EMAIL, 
             role: 'admin' 
         };
-        return res.redirect('/');
+    } else {
+        // 2. Check Database
+        const user = await User.findOne({ $or: [{ email: inputID }, { username: inputID }] });
+        if (user && await bcrypt.compare(inputPass, user.password)) {
+            loggedInUser = { username: user.username, email: user.email, role: user.role };
+        }
     }
 
-    // 2. SECOND CHECK: Does it match a user in the JSON file?
-    const user = users.find(u => (u.email === inputID || u.username === inputID) && u.password === inputPass);
-
-    if (user) {
-        req.session.user = { 
-            username: user.username, 
-            email: user.email, 
-            role: user.role || 'student' 
-        };
-        res.redirect('/');
+    if (loggedInUser) {
+        req.session.user = loggedInUser;
+        
+        // INSTEAD OF res.redirect('/'), we send a small script.
+        // This removes the Login page from the history stack.
+        return res.send(`
+            <script>
+                window.location.replace('/');
+            </script>
+        `);
     } else {
         res.status(401).send("Invalid credentials <a href='/login'>Try Again</a>");
     }
 });
 
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
-    const users = getUsers();
-
-    if (users.find(u => u.email === email)) return res.status(400).send("User exists!");
-
-    const backupCodes = generateBackupCodes();
-    users.push({ username: name, email, password, role: 'student', backupCodes });
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-
-    res.send(`<h2>Registration Success!</h2><p>Backup Codes: ${backupCodes.join(', ')}</p><a href="/login">Login</a>`);
-});
-
-app.get('/logout', (req, res) => {
-    req.session.destroy((err) => {
-        if (err) return res.redirect('/');
-        res.clearCookie('connect.sid');
-        res.redirect('/login');
-    });
-});
-
-app.post('/api/delete-account', (req, res) => {
-    if (!req.session.user) return res.status(401).json({ success: false });
-
-    const { email, username } = req.body;
-    const currentUser = req.session.user;
-    const users = getUsers();
-    const targetUser = users.find(u => u.email === email);
-
-    // Prevent deletion of admin from JSON or .env
-    if ((targetUser && targetUser.role === 'admin') || email === process.env.ADMIN_EMAIL) {
-        return res.status(403).json({ 
-            success: false, 
-            message: "System Administrators cannot be deleted for security reasons." 
-        });
-    }
-
-    const isDeletingSelf = (currentUser.email === email);
-    const isAdmin = (currentUser.role === 'admin');
-
-    if (isAdmin || isDeletingSelf) {
-        const updatedUsers = users.filter(u => u.email !== email);
-        const updatedMarks = getMarks().filter(m => m.username !== username);
-
-        fs.writeFileSync(USERS_FILE, JSON.stringify(updatedUsers, null, 2));
-        fs.writeFileSync(MARKS_FILE, JSON.stringify(updatedMarks, null, 2));
-
-        if (isDeletingSelf) {
-            req.session.destroy();
-        }
-
-        return res.json({ success: true });
-    } else {
-        return res.status(403).json({ success: false, message: "Unauthorized action." });
-    }
-});
-
-// =====================
-// ADMIN & QUIZ API
-// =====================
-
-app.post('/api/admin/upload-questions', isAdmin, upload.single('jsonFile'), (req, res) => {
-    const { topic } = req.body;
-    const filePath = path.join(DATA_DIR, `${topic.toLowerCase()}.json`);
-
     try {
-        const newData = JSON.parse(fs.readFileSync(req.file.path, 'utf8'));
-        let existing = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf8')) : [];
-        
-        newData.forEach(q => {
-            const { id: oldId, ...restOfQuestion } = q;
-            const formattedQuestion = {
-                id: existing.length + 1,
-                ...restOfQuestion
-            };
-            existing.push(formattedQuestion);
-        });
+        const cleanEmail = email.toLowerCase().trim();
+        const existing = await User.findOne({ email: cleanEmail });
+        if (existing) return res.status(400).send("User exists!");
 
-        fs.writeFileSync(filePath, JSON.stringify(existing, null, 2));
-        fs.unlinkSync(req.file.path); 
-        res.send(`<h2>Uploaded ${newData.length} questions!</h2><a href="/admin-dashboard">Back</a>`);
-    } catch (e) {
-        console.error(e);
-        res.status(400).send("Invalid JSON file.");
-    }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({ username: name.trim(), email: cleanEmail, password: hashedPassword });
+        await newUser.save();
+        res.send(`<h2>Registration Success!</h2><a href="/login">Login</a>`);
+    } catch (e) { res.status(500).send("Registration failed"); }
 });
 
-app.post('/api/admin/add-question', isAdmin, (req, res) => {
+app.post('/api/delete-account', async (req, res) => {
+    const { email } = req.body;
+    if (email === process.env.ADMIN_EMAIL) return res.status(403).json({ success: false });
+
+    await User.deleteOne({ email });
+    // Wipe marks associated with this email
+    await Mark.deleteMany({ email });
+
+    if (req.session.user.email === email) {
+        req.session.destroy();
+    }
+    res.json({ success: true });
+});
+
+// =====================
+// QUIZ & ADMIN MGMT API
+// =====================
+
+app.post('/submit-quiz', async (req, res) => {
+    try {
+        const { topic, score, results } = req.body;
+        const email = req.session.user.email; 
+        const newMark = new Mark({ email, topic, score, results });
+        await newMark.save();
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
+app.get('/api/user-stats', async (req, res) => {
+    try {
+        const stats = await Mark.aggregate([
+            { $match: { email: req.session.user.email } },
+            { $group: { _id: "$topic", avgScore: { $avg: "$score" } } }
+        ]);
+        res.json({
+            labels: stats.map(s => s._id),
+            averages: stats.map(s => (s.avgScore * 20).toFixed(2))
+        });
+    } catch (e) { res.status(500).json({ error: "Stat error" }); }
+});
+
+app.post('/api/admin/add-question', isAdmin, async (req, res) => {
     const { topic, question, options, answer } = req.body;
-    const filePath = path.join(DATA_DIR, `${topic.toLowerCase()}.json`);
-    let questions = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf8')) : [];
-    
-    questions.push({
-        id: questions.length + 1,
+    const newQ = new Question({
+        topic: topic.toLowerCase(),
         question,
         options: options.split(',').map(s => s.trim()),
         answer: parseInt(answer)
     });
-
-    fs.writeFileSync(filePath, JSON.stringify(questions, null, 2));
+    await newQ.save();
     res.redirect('/admin-dashboard');
 });
 
-app.post('/submit-quiz', (req, res) => {
-    const { username, topic, score, results } = req.body;
-    const allMarks = getMarks();
-    allMarks.push({ username, topic, score, results, date: new Date().toLocaleString() });
-    fs.writeFileSync(MARKS_FILE, JSON.stringify(allMarks, null, 2));
-    res.json({ success: true });
+app.post('/api/admin/upload-questions', isAdmin, upload.single('jsonFile'), async (req, res) => {
+    const { topic } = req.body;
+    try {
+        const rawData = fs.readFileSync(req.file.path, 'utf8');
+        const newData = JSON.parse(rawData);
+        const formattedQuestions = newData.map(q => ({
+            topic: topic.toLowerCase(),
+            question: q.question,
+            options: q.options,
+            answer: q.answer
+        }));
+        await Question.insertMany(formattedQuestions);
+        fs.unlinkSync(req.file.path); 
+        res.send(`<h2>✅ Success!</h2><a href="/admin-dashboard">Return</a>`);
+    } catch (e) { res.status(400).send("Error in upload."); }
+});
+
+app.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.clearCookie('connect.sid');
+        res.redirect('/login');
+    });
 });
 
 app.listen(PORT, () => console.log(`Server: http://localhost:${PORT}`));
