@@ -1,187 +1,239 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= topic.toUpperCase() %> Quiz | CoursePrep</title>
+    <title>
+        <%= topic.toUpperCase() %> Quiz | CoursePrep
+    </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <%- include('header') %>
-    <style>
-        :root {
-            --primary-dark: #0f3d2e;
-            --secondary-green: #1b5e4b;
-            --bg-light: #f4f7f6;
-        }
+        <style>
+            :root {
+                --primary-dark: #0f3d2e;
+                --secondary-green: #1b5e4b;
+                --bg-light: #f4f7f6;
+            }
 
-        body { background-color: var(--bg-light); }
+            body {
+                background-color: var(--bg-light);
+            }
 
-        .quiz-container {
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 0 20px;
-        }
+            .quiz-container {
+                max-width: 800px;
+                margin: 50px auto;
+                padding: 0 20px;
+            }
 
-        .quiz-header {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+            .quiz-header {
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                margin-bottom: 30px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
 
-        .quiz-header h1 { color: var(--primary-dark); text-transform: uppercase; font-size: 24px; }
+            .quiz-header h1 {
+                color: var(--primary-dark);
+                text-transform: uppercase;
+                font-size: 24px;
+            }
 
-        .question-card {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-            border-left: 5px solid var(--secondary-green);
-        }
+            .question-card {
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+                border-left: 5px solid var(--secondary-green);
+            }
 
-        .question-text { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #333; }
+            .question-text {
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 20px;
+                color: #333;
+            }
 
-        .option-label {
-            display: block;
-            padding: 12px 15px;
-            margin-bottom: 10px;
-            border: 1.5px solid #eee;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+            .option-label {
+                display: block;
+                padding: 12px 15px;
+                margin-bottom: 10px;
+                border: 1.5px solid #eee;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: 0.2s;
+            }
 
-        .option-label:hover { background: #f9fdfc; border-color: var(--secondary-green); }
+            .option-label:hover {
+                background: #f9fdfc;
+                border-color: var(--secondary-green);
+            }
 
-        input[type="radio"] { margin-right: 12px; accent-color: var(--primary-dark); }
+            input[type="radio"] {
+                margin-right: 12px;
+                accent-color: var(--primary-dark);
+            }
 
-        .submit-section { text-align: center; margin-top: 40px; }
+            .submit-section {
+                text-align: center;
+                margin-top: 40px;
+            }
 
-        .btn-submit {
-            background: var(--primary-dark);
-            color: white;
-            padding: 15px 50px;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+            .btn-submit {
+                background: var(--primary-dark);
+                color: white;
+                padding: 15px 50px;
+                border: none;
+                border-radius: 10px;
+                font-size: 18px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: 0.3s;
+            }
 
-        .btn-submit:hover { background: var(--secondary-green); transform: translateY(-2px); }
+            .btn-submit:hover {
+                background: var(--secondary-green);
+                transform: translateY(-2px);
+            }
 
-        .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
-    </style>
+            .btn-submit:disabled {
+                background: #ccc;
+                cursor: not-allowed;
+            }
+        </style>
 </head>
+
 <body>
 
-<div class="quiz-container">
-    <div class="quiz-header">
-        <h1><%= topic %> Quiz</h1>
-        <div style="color: #666;"><i class="fa-solid fa-file-lines"></i> <%= questions.length %> Questions</div>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1>
+                <%= topic %> Quiz
+            </h1>
+            <div style="color: #666;"><i class="fa-solid fa-file-lines"></i>
+                <%= questions.length %> Questions
+            </div>
+        </div>
+
+        <form id="quizForm">
+            <% questions.forEach((q, index)=> { %>
+                <div class="question-card">
+                    <p class="question-text">
+                        <%= index + 1 %>. <%= q.question %>
+                    </p>
+                    <div class="options">
+                        <% q.options.forEach(option=> { %>
+                            <label class="option-label">
+                                <input type="radio" name="q<%= index %>" value="<%= option %>"
+                                    data-correct="<%= q.answer %>" data-question="<%= q.question %>" required>
+                                <%= option %>
+                            </label>
+                            <% }) %>
+                    </div>
+                </div>
+                <% }) %>
+
+                    <div class="submit-section">
+                        <button type="button" id="submitBtn" class="btn-submit" onclick="processQuiz()">
+                            Submit Assessment
+                        </button>
+                    </div>
+        </form>
     </div>
 
-    <form id="quizForm">
-        <% questions.forEach((q, index) => { %>
-            <div class="question-card">
-                <p class="question-text"><%= index + 1 %>. <%= q.question %></p>
-                <div class="options">
-                    <% q.options.forEach(option => { %>
-                        <label class="option-label">
-                            <input type="radio" 
-                                   name="q<%= index %>" 
-                                   value="<%= option %>" 
-                                   data-correct="<%= q.answer %>" 
-                                   data-question="<%= q.question %>" 
-                                   required>
-                            <%= option %>
-                        </label>
-                    <% }) %>
-                </div>
-            </div>
-        <% }) %>
+    <%- include('footer') %>
 
-        <div class="submit-section">
-            <button type="button" id="submitBtn" class="btn-submit" onclick="processQuiz()">
-                Submit Assessment
-            </button>
-        </div>
-    </form>
-</div>
+        <script>
+            async function processQuiz() {
+                const form = document.getElementById('quizForm');
+                const submitBtn = document.getElementById('submitBtn');
 
-<%- include('footer') %>
+                // Safety check for question length
+                const totalQuestions = parseInt("<%= questions.length %>") || 0;
+                const answered = form.querySelectorAll('input[type="radio"]:checked').length;
 
-<script>
-async function processQuiz() {
-    const form = document.getElementById('quizForm');
-    const submitBtn = document.getElementById('submitBtn');
-    
-    // FIX: Wrap in quotes and convert to Number to avoid "Expression expected" error
-    const totalQuestions = Number("<%= questions ? questions.length : 0 %>");
-    const answered = form.querySelectorAll('input[type="radio"]:checked').length;
+                if (answered < totalQuestions) {
+                    alert(`Please answer all ${totalQuestions} questions before submitting.`);
+                    return;
+                }
 
-    if (answered < totalQuestions) {
-        alert(`Please answer all ${totalQuestions} questions before submitting.`);
-        return;
-    }
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Processing Score...";
 
-    submitBtn.disabled = true;
-    submitBtn.innerText = "Processing Score...";
+                let score = 0;
+                let results = [];
 
-    let score = 0;
-    let results = [];
+                const questionBlocks = document.querySelectorAll('.question-card');
 
-    const questionBlocks = document.querySelectorAll('.question-card');
-    questionBlocks.forEach(block => {
-        const selectedInput = block.querySelector('input[type="radio"]:checked');
-        
-        // Use getAttribute for better compatibility with data- attributes
-        const questionText = selectedInput.getAttribute('data-question');
-        const correctAnswer = selectedInput.getAttribute('data-correct');
-        const userAnswer = selectedInput.value;
-        const isCorrect = (userAnswer === correctAnswer);
+                questionBlocks.forEach((block, index) => {
+                    const selectedInput = block.querySelector('input[type="radio"]:checked');
 
-        if (isCorrect) score++;
+                    if (selectedInput) {
+                        // 1. Get the user's selected text (e.g., "Compilation")
+                        const userAnswerText = selectedInput.value.trim();
 
-        results.push({
-            question: questionText,
-            userAnswer: userAnswer,
-            correctAnswer: correctAnswer,
-            status: isCorrect
-        });
-    });
+                        // 2. Get the correct index from our data (e.g., 2)
+                        const correctIndex = parseInt(selectedInput.getAttribute('data-correct'));
 
-    const urlParams = new URLSearchParams(window.location.search);
-    try {
-        const response = await fetch('/submit-quiz', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                username: urlParams.get('user'),
-                topic: '<%= topic %>', // Injected as string safely
-                score: score,
-                results: results
-            })
-        });
+                        // 3. Since we are in a loop, we need to find the text that matches that index.
+                        // We look at all labels in THIS specific question block.
+                        const allOptionsInBlock = Array.from(block.querySelectorAll('input[type="radio"]')).map(input => input.value);
+                        const correctAnswerText = allOptionsInBlock[correctIndex];
 
-        if (response.ok) {
-            alert(`Assessment Complete! You scored ${score} out of ${totalQuestions}.`);
-            window.location.href = `/profile?user=${urlParams.get('user')}&email=${urlParams.get('email')}`;
-        } else {
-            throw new Error("Failed to save");
-        }
-    } catch (err) {
-        alert("Error saving score. Please try again.");
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Submit Assessment";
-    }
-}
-</script>
+                        // 4. Compare the text strings
+                        const isCorrect = (userAnswerText === correctAnswerText);
+
+                        if (isCorrect) score++;
+
+                        results.push({
+                            question: selectedInput.getAttribute('data-question'),
+                            userAnswer: userAnswerText,
+                            correctAnswer: correctAnswerText,
+                            status: isCorrect
+                        });
+
+                        // Debugging Log - This will show you the fix in action
+                        console.log(`Q${index + 1}: User chose "${userAnswerText}", Correct is "${correctAnswerText}" (Index ${correctIndex})`);
+                    }
+                });
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const currentUser = urlParams.get('user');
+                const currentEmail = urlParams.get('email');
+
+                try {
+                    const response = await fetch('/submit-quiz', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            username: currentUser,
+                            topic: "<%= topic %>",
+                            score: score,
+                            results: results
+                        })
+                    });
+
+                    if (response.ok) {
+                        alert(`Assessment Complete! You scored ${score} out of ${totalQuestions}.`);
+                        window.location.href = `/profile?user=${currentUser}&email=${currentEmail}`;
+                    } else {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || "Failed to save score");
+                    }
+                } catch (err) {
+                    console.error("Submission Error:", err);
+                    alert("Error saving score: " + err.message);
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Submit Assessment";
+                }
+            }
+        </script>
 
 </body>
+
 </html>

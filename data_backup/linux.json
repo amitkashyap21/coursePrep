@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "question": "Which command is used to list files in a directory?",
+    "options": [
+      "dir",
+      "ls",
+      "list",
+      "show"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 2,
+    "question": "What is the command to change file permissions?",
+    "options": [
+      "chown",
+      "chperm",
+      "chmod",
+      "attrib"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 3,
+    "question": "Which directory contains system configuration files?",
+    "options": [
+      "/bin",
+      "/home",
+      "/etc",
+      "/var"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 4,
+    "question": "How do you check the current working directory?",
+    "options": [
+      "cd",
+      "pwd",
+      "whereami",
+      "path"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 5,
+    "question": "Which command is used to terminate a process?",
+    "options": [
+      "stop",
+      "exit",
+      "kill",
+      "halt"
+    ],
+    "answer": 2
+  }
+]
