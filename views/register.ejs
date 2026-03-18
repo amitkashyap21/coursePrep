@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Register | CoursePrep</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <%- include('header') %>
     <style>
         /* Reset and Base Styles */
@@ -15,7 +16,6 @@
 
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            height: 100vh;
             background-color: #f5f5f5;
         }
 
@@ -83,7 +83,6 @@
             box-shadow: 0 0 0 3px rgba(15, 61, 46, 0.1);
         }
 
-        /* Added a small note for the backup codes */
         .info-note {
             font-size: 12px;
             color: #0f3d2e;
@@ -126,7 +125,6 @@
             color: #0f3d2e;
             text-decoration: none;
             font-weight: 600;
-            transition: color 0.3s ease;
         }
 
         /* RIGHT SIDE */
@@ -138,71 +136,41 @@
             flex-direction: column;
             justify-content: space-between;
             padding: 60px;
-            position: relative;
         }
 
         .right h1 {
             font-size: 36px;
             margin-bottom: 20px;
             font-weight: 700;
-            line-height: 1.2;
-        }
-
-        .right p {
-            font-size: 18px;
-            line-height: 1.6;
-            max-width: 450px;
-            opacity: 0.9;
-        }
-
-        .contact {
-            margin-top: auto;
-        }
-
-        .contact h3 {
-            margin-bottom: 20px;
-            font-size: 20px;
-            letter-spacing: 1px;
-        }
-
-        .contact-details {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
         }
 
         .contact-details span {
             background: rgba(255, 255, 255, 0.1);
             padding: 12px 20px;
             border-radius: 50px;
-            font-size: 15px;
+            font-size: 14px;
             backdrop-filter: blur(5px);
-            width: fit-content;
+            display: inline-block;
+            margin-top: 10px;
         }
 
         @media (max-width: 968px) {
             .container { flex-direction: column; height: auto; }
             .left, .right { width: 100%; padding: 40px 20px; }
-            .right { min-height: 400px; }
         }
     </style>
 </head>
 
 <body>
-
     <div class="container">
-
         <div class="left">
             <div class="form-box">
                 <h2>Create Account</h2>
-                <p>
-                    Join us today and start preparing for your
-                    dream interviews with confidence.
-                </p>
+                <p>Join us today and start preparing for your dream interviews with confidence.</p>
 
                 <div class="info-note">
                     <i class="fas fa-shield-alt"></i> 
-                    After registering, you will receive <b>6 One-Time Backup Codes</b> to recover your account if you forget your password.
+                    Registration is secure. Your data is encrypted and protected.
                 </div>
 
                 <form action="/register" method="POST">
@@ -215,12 +183,11 @@
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password" placeholder="Create a password" required>
 
-                    <button type="submit">Register & Get Backup Codes</button>
+                    <button type="submit">Register Now</button>
                 </form>
 
                 <div class="login-link">
-                    Already have an account?
-                    <a href="/login">Login here</a>
+                    Already have an account? <a href="/login">Login here</a>
                 </div>
             </div>
         </div>
@@ -228,21 +195,17 @@
         <div class="right">
             <div>
                 <h1>Start Your Interview Journey</h1>
-                <p>
-                    Build your profile, practice interview questions,
-                    and get ready to land your dream job.
-                </p>
+                <p>Build your profile, practice interview questions, and get ready to land your dream job.</p>
             </div>
 
             <div class="contact">
-                <h3>Contact Us</h3>
+                <p style="margin-bottom: 15px; font-weight: 600;">Contact Us</p>
                 <div class="contact-details">
-                    <span>📞 +91 98765 43210</span>
-                    <span>📧 support@interviewhub.com</span>
+                    <span><i class="fas fa-phone"></i> +91 98765 43210</span><br>
+                    <span><i class="fas fa-envelope"></i> support@courseprep.com</span>
                 </div>
             </div>
         </div>
-
     </div>
 
     <%- include('footer') %>

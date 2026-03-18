@@ -1,79 +1,62 @@
-console.log("Firstpage JS is working");
+/**
+ * firstpage.js
+ * Logic for landing page: UI initialization and history fetching.
+ */
 
-// =====================
-// NAVIGATION GUARD
-// =====================
-function setupNavigationGuard() {
-    const isHomePage = window.location.pathname === '/';
+console.log("Firstpage JS initialized");
 
-    // 1. If we are NOT on home, don't set any traps
-    if (!isHomePage) {
-        // Just in case a trap was left over, clear the listener logic
-        window.onpopstate = null; 
-        return;
-    }
-
-    // 2. If we ARE on home, anchor the history
-    // We use a unique object { isHome: true } to identify our trap
-    if (!history.state || !history.state.isHome) {
-        history.replaceState({ isHome: true }, null, window.location.href);
-        history.pushState({ isHome: true, active: true }, null, window.location.href);
-    }
-
-    // 3. The logic that handles the "Back" click
-    window.onpopstate = function (event) {
-        // ONLY trigger if the state we just 'popped' was our home trap
-        if (window.location.pathname === '/') {
-            const confirmLogout = confirm("Do you want to logout and close your session?");
-            
-            if (confirmLogout) {
-                window.location.href = "/logout";
-            } else {
-                // If they cancel, push the active state back to re-lock the door
-                history.pushState({ isHome: true, active: true }, null, window.location.href);
-            }
-        }
-    };
-}
-
-// =====================
-// HISTORY LOADING
-// =====================
+/**
+ * 1. Load User Quiz History
+ * Fetches recent scores from the database via API.
+ */
 async function loadHistory() {
     const container = document.getElementById('history-list');
 
+    // If this element isn't on the page (e.g., user is logged out), stop.
     if (!container) return;
 
     try {
-        const response = await fetch('/api/user-history');
-        if (!response.ok) return;
-
-        const historyData = await response.json();
-
-        if (!historyData || historyData.length === 0) {
-            container.innerHTML = "";
+        // We use the stats API we built in server.js or a specific history one
+        const response = await fetch('/api/user-stats'); 
+        
+        if (!response.ok) {
+            container.innerHTML = "<p>Sign in to see your recent activity.</p>";
             return;
         }
 
-        container.innerHTML = historyData.map(item => `
+        const data = await response.json();
+
+        // If no labels exist, user hasn't taken any tests
+        if (!data.labels || data.labels.length === 0) {
+            container.innerHTML = "<div class='empty-state'>No tests taken yet. Start your first quiz!</div>";
+            return;
+        }
+
+        // Render the list cleanly
+        container.innerHTML = data.labels.map((topic, index) => `
             <div class="history-item">
                 <div class="history-info">
-                    <strong>${item.topic ? item.topic.toUpperCase() : "UNKNOWN"}</strong>
-                    <span>${new Date(item.date).toLocaleDateString() || ""}</span>
+                    <strong>${topic.toUpperCase()}</strong>
+                    <span>Average Performance</span>
                 </div>
                 <div class="history-score">
-                    ${item.score || 0}/5
+                    ${data.averages[index]}%
                 </div>
             </div>
         `).join('');
 
     } catch (error) {
-        console.error("History failed to load:", error);
+        console.error("❌ History failed to load:", error);
+        container.innerHTML = "<p>Unable to load history at this time.</p>";
     }
 }
 
-// Run everything after DOM is ready
+/**
+ * 2. Initialize Page
+ */
 document.addEventListener("DOMContentLoaded", () => {
+    // Load history if the user is logged in
     loadHistory();
-    setupNavigationGuard(); // Start the back-button trap
+
+    // Note: setupNavigationGuard was removed to improve user experience 
 });

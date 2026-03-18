@@ -36,15 +36,14 @@
     </style>
 </head>
 
-<nav class="navbar" id="mainNavbar" data-is-logged-in="<%= (typeof username !== 'undefined' && username) ? 'true' : 'false' %>">
+<nav class="navbar" id="mainNavbar">
     <a href="/" class="logo">CoursePrep</a>
 
     <div class="nav-links">
         <a href="/">Home</a>
 
-        <% if (typeof username !== 'undefined' && username) { %>
-            
-            <% if (typeof role !== 'undefined' && role === 'admin') { %>
+        <% if (user) { %>
+            <% if (user.role === 'admin') { %>
                 <a href="/admin-dashboard" class="admin-pill">
                     <i class="fa-solid fa-screwdriver-wrench"></i> Admin Panel
                 </a>
@@ -62,41 +61,4 @@
     </div>
 </nav>
 
-
-
-<script>
-    /**
-     * 1. Manual Logout Confirmation
-     */
-    function confirmLogout() {
-        if (confirm("Are you sure you want to logout?")) {
-            window.location.href = '/logout';
-        }
-    }
-
-    /**
-     * 2. Swipe Back / Browser History Guard
-     * We pull the 'loggedIn' status from the HTML attribute 
-     * so VS Code doesn't see EJS tags inside the script.
-     */
-    (function() {
-        const nav = document.getElementById('mainNavbar');
-        const isLoggedIn = nav.getAttribute('data-is-logged-in') === 'true';
-
-        if (isLoggedIn) {
-            // Create a "dummy" history point
-            history.pushState(null, null, location.href);
-
-            window.onpopstate = function () {
-                const userWantsLogout = confirm("Do you want to logout and close your session?");
-                
-                if (userWantsLogout) {
-                    window.location.href = '/logout';
-                } else {
-                    // Stay on the page by pushing the state back
-                    history.pushState(null, null, location.href);
-                }
-            };
-        }
-    })();
-</script>
+<script src="/js/header.js"></script>

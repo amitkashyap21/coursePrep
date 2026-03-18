@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,146 +7,35 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <%- include('header') %>
+  
   <style>
-    /* 1. STYLES & VARIABLES */
-    :root {
-      --primary-dark: #0f3d2e;
-      --secondary-green: #1b5e4b;
-      --danger: #d9534f;
-      --bg-light: #f4f7f6;
-      --accent-blue: #3498db;
-    }
-
-    body {
-      background-color: var(--bg-light);
-      padding-bottom: 50px;
-      font-family: 'Segoe UI', sans-serif;
-    }
-
-    .profile-container {
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
-
-    /* Card Designs */
-    .card,
-    .analytics-card {
-      background: white;
-      border-radius: 15px;
-      padding: 30px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-      margin-bottom: 30px;
-    }
-
-    .card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    /* Stats Grid */
-    .admin-stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-
-    .stat-card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-      border-bottom: 4px solid var(--primary-dark);
-    }
-
-    /* Quiz History Items */
-    .quiz-card {
-      background: white;
-      border-radius: 12px;
-      margin-bottom: 15px;
-      border: 1px solid #e0e0e0;
-      overflow: hidden;
-      transition: 0.3s;
-    }
-
-    .quiz-summary {
-      padding: 18px 25px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-    }
-
-    .quiz-summary:hover {
-      background: #fafafa;
-    }
-
-    .quiz-details {
-      display: none;
-      padding: 20px 25px;
-      border-top: 1px solid #eee;
-      background: #fdfdfd;
-    }
-
-    /* Badges & Icons */
-    .topic-badge {
-      background: rgba(15, 61, 46, 0.1);
-      color: var(--primary-dark);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-weight: 700;
-      text-transform: uppercase;
-      font-size: 11px;
-    }
-
-    .fa-chevron-down {
-      transition: transform 0.3s;
-      color: #ccc;
-    }
-
-    .quiz-card.active .fa-chevron-down {
-      transform: rotate(180deg);
-    }
-
-    /* Chart Box */
-    .chart-container {
-      position: relative;
-      margin: 20px auto;
-      height: 350px;
-      width: 100%;
-    }
-
-    /* Helper Classes */
-    .text-success {
-      color: #28a745;
-    }
-
-    .text-danger {
-      color: #dc3545;
-    }
-
-    .btn-delete {
-      background: none;
-      border: 1.5px solid var(--danger);
-      color: var(--danger);
-      padding: 8px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.3s;
-      font-weight: 600;
-    }
-
-    .btn-delete:hover {
-      background: var(--danger);
-      color: white;
-    }
+    /* ... (Keep your existing CSS exactly as it is) ... */
+    :root { --primary-dark: #0f3d2e; --secondary-green: #1b5e4b; --danger: #d9534f; --bg-light: #f4f7f6; }
+    body { background-color: var(--bg-light); padding-bottom: 50px; font-family: 'Segoe UI', sans-serif; }
+    .profile-container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+    .card, .analytics-card { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); margin-bottom: 30px; }
+    .card { display: flex; align-items: center; justify-content: space-between; }
+    .admin-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .stat-card { background: white; padding: 20px; border-radius: 12px; text-align: center; border-bottom: 4px solid var(--primary-dark); }
+    .quiz-card { background: white; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e0e0e0; overflow: hidden; }
+    .quiz-summary { padding: 18px 25px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .quiz-details { display: none; padding: 20px 25px; border-top: 1px solid #eee; background: #fdfdfd; }
+    .topic-badge { background: rgba(15, 61, 46, 0.1); color: var(--primary-dark); padding: 4px 12px; border-radius: 20px; font-weight: 700; text-transform: uppercase; font-size: 11px; }
+    .chart-container { position: relative; margin: 20px auto; height: 350px; width: 100%; }
+    .text-success { color: #28a745; }
+    .text-danger { color: #dc3545; }
+    .btn-delete { background: none; border: 1.5px solid var(--danger); color: var(--danger); padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .btn-delete:hover { background: var(--danger); color: white; }
   </style>
 </head>
 
 <body>
+  <div id="profile-data" 
+       data-user-role="<%= role %>" 
+       data-user-email="<%= email %>"
+       data-has-marks="<%= marks && marks.length > 0 %>">
+  </div>
+
   <div class="profile-container">
     <div class="card">
       <div class="user-meta">
@@ -156,173 +44,81 @@
       </div>
       <div class="actions">
         <% if (role === 'admin') { %>
-        <span style="background: #e8f5e9; color: #2e7d32; padding: 8px 15px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-          <i class="fa-solid fa-user-shield"></i> Admin Mode
-        </span>
+          <span style="background: #e8f5e9; color: #2e7d32; padding: 8px 15px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-user-shield"></i> Admin Mode
+          </span>
         <% } else { %>
-        <button class="btn-delete" onclick="deleteAccount()"><i class="fa-solid fa-trash-can"></i> Delete Account</button>
+          <button class="btn-delete" id="deleteAccountBtn">
+            <i class="fa-solid fa-trash-can"></i> Delete Account
+          </button>
         <% } %>
       </div>
     </div>
 
     <% if (role === 'admin') { %>
-    <h3 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fa-solid fa-gauge-high"></i> Platform Stats</h3>
-    <div class="admin-stats-grid">
-      <div class="stat-card">
-        <i class="fa-solid fa-users" style="color: var(--secondary-green); font-size: 24px;"></i>
-        <h4 style="font-size: 12px; color: #777; margin: 10px 0;">TOTAL USERS</h4>
-        <p style="font-size: 22px; font-weight: bold;"><%= stats.totalUsers %></p>
+      <h3 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fa-solid fa-gauge-high"></i> Platform Stats</h3>
+      <div class="admin-stats-grid">
+        <div class="stat-card">
+          <i class="fa-solid fa-users" style="color: var(--secondary-green); font-size: 24px;"></i>
+          <h4 style="font-size: 12px; color: #777; margin: 10px 0;">TOTAL USERS</h4>
+          <p style="font-size: 22px; font-weight: bold;"><%= stats.totalUsers %></p>
+        </div>
+        <div class="stat-card">
+          <i class="fa-solid fa-file-lines" style="color: var(--secondary-green); font-size: 24px;"></i>
+          <h4 style="font-size: 12px; color: #777; margin: 10px 0;">QUIZZES TAKEN</h4>
+          <p style="font-size: 22px; font-weight: bold;"><%= stats.totalQuizzes %></p>
+        </div>
+        <div class="stat-card" style="border-bottom-color: #f0ad4e; cursor: pointer;" onclick="window.location.href='/admin-dashboard'">
+          <i class="fa-solid fa-plus" style="color: #f0ad4e; font-size: 24px;"></i>
+          <h4 style="font-size: 12px; color: #777; margin: 10px 0;">MANAGE</h4>
+          <p style="font-size: 22px;">Database</p>
+        </div>
       </div>
-      <div class="stat-card">
-        <i class="fa-solid fa-file-lines" style="color: var(--secondary-green); font-size: 24px;"></i>
-        <h4 style="font-size: 12px; color: #777; margin: 10px 0;">QUIZZES CREATED</h4>
-        <p style="font-size: 22px; font-weight: bold;"><%= stats.totalQuizzes %></p>
-      </div>
-      <div class="stat-card" style="border-bottom-color: #f0ad4e; cursor: pointer;" onclick="window.location.href='/admin-dashboard'">
-        <i class="fa-solid fa-plus" style="color: #f0ad4e; font-size: 24px;"></i>
-        <h4 style="font-size: 12px; color: #777; margin: 10px 0;">MANAGE</h4>
-        <p style="font-size: 22px;">Database</p>
-      </div>
-    </div>
-
     <% } else { %>
-    <h3 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fa-solid fa-chart-line"></i> Your Performance</h3>
-    <div class="analytics-card">
-      <% if (marks && marks.length > 0) { %>
-      <div class="chart-container"><canvas id="performanceChart"></canvas></div>
-      <% } else { %>
-      <p style="color: #888; padding: 20px;">Complete a quiz to unlock your performance chart!</p>
-      <% } %>
-    </div>
+      <h3 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fa-solid fa-chart-line"></i> Your Performance</h3>
+      <div class="analytics-card">
+        <% if (marks && marks.length > 0) { %>
+          <div class="chart-container"><canvas id="performanceChart"></canvas></div>
+        <% } else { %>
+          <p style="color: #888; padding: 20px;">Complete a quiz to unlock your performance chart!</p>
+        <% } %>
+      </div>
 
-    <h3 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h3>
-    <% if (marks && marks.length > 0) { %>
-    <% marks.slice().reverse().forEach((attempt, index) => { %>
-    <div class="quiz-card" id="card-<%= index %>">
-      <div class="quiz-summary" onclick="toggleDetails('quiz-<%= index %>', 'card-<%= index %>')">
-        <div>
-          <span class="topic-badge"><%= attempt.topic %></span>
-          <span style="margin-left: 15px; color: #888; font-size: 12px;"><%= attempt.date %></span>
+      <h3 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h3>
+      <% marks.slice().reverse().forEach((attempt, index) => { %>
+        <div class="quiz-card" data-quiz-index="<%= index %>">
+          <div class="quiz-summary">
+            <div>
+              <span class="topic-badge"><%= attempt.topic %></span>
+              <span style="margin-left: 15px; color: #888; font-size: 12px;"><%= attempt.date %></span>
+            </div>
+            <div>
+              <span style="font-weight: 600;">Score: <%= attempt.score %>/5</span>
+              <i class="fa-solid fa-chevron-down" style="margin-left: 10px;"></i>
+            </div>
+          </div>
+          <div class="quiz-details">
+            <% attempt.results.forEach(res => { %>
+              <div style="padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
+                <p style="font-size: 14px; margin: 0 0 5px 0;"><strong>Q:</strong> <%= res.question %></p>
+                <span class="<%= res.status ? 'text-success' : 'text-danger' %>">
+                  <i class="fa-solid <%= res.status ? 'fa-circle-check' : 'fa-circle-xmark' %>"></i>
+                  Your Ans: <%= res.userAnswer %>
+                </span>
+                <% if (!res.status) { %>
+                  <span style="display:block; font-size:13px; color:#28a745; margin-top:4px; font-weight:600;">
+                    Correct: <%= res.correctAnswer %>
+                  </span>
+                <% } %>
+              </div>
+            <% }) %>
+          </div>
         </div>
-        <div>
-          <span style="font-weight: 600;">Score: <%= attempt.score %>/5</span>
-          <i class="fa-solid fa-chevron-down" style="margin-left: 10px;"></i>
-        </div>
-      </div>
-      <div class="quiz-details" id="quiz-<%= index %>">
-        <% attempt.results.forEach(res => { %>
-        <div style="padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
-          <p style="font-size: 14px; margin: 0 0 5px 0;"><strong>Q:</strong> <%= res.question %></p>
-          <span class="<%= res.status ? 'text-success' : 'text-danger' %>">
-            <i class="fa-solid <%= res.status ? 'fa-circle-check' : 'fa-circle-xmark' %>"></i>
-            Your Ans: <%= res.userAnswer %>
-          </span>
-          <% if (!res.status) { %>
-          <span style="display:block; font-size:13px; color:#28a745; margin-top:4px; font-weight:600;">
-            Correct: <%= res.correctAnswer %>
-          </span>
-          <% } %>
-        </div>
-        <% }) %>
-      </div>
-    </div>
-    <% }) %>
-    <% } else { %>
-    <div class="card" style="justify-content: center;">
-      <p>No quiz history found.</p>
-    </div>
-    <% } %>
+      <% }) %>
     <% } %>
   </div>
 
-  <script>
-    // Toggle Quiz Details
-    function toggleDetails(detailId, cardId) {
-      const el = document.getElementById(detailId);
-      const card = document.getElementById(cardId);
-      const isCurrentlyOpen = el.style.display === "block";
-
-      el.style.display = isCurrentlyOpen ? "none" : "block";
-      card.classList.toggle('active', !isCurrentlyOpen);
-    }
-
-    // Account Deletion
-    async function deleteAccount() {
-      if (!confirm("Warning: This will permanently delete your account and progress.")) return;
-
-      const uName = "<%= username %>";
-      const uEmail = "<%= email %>";
-
-      try {
-        const res = await fetch('/api/delete-account', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            email: uEmail,
-            username: uName
-          })
-        });
-        if (res.ok) window.location.href = '/login';
-      } catch (err) {
-        alert("Error deleting account.");
-      }
-    }
-
-    // Chart Loader (Percentage Logic)
-    <% if (role !== 'admin' && marks && marks.length > 0) { %>
-    async function loadChart() {
-      try {
-        const res = await fetch('/api/user-stats');
-        const data = await res.json();
-        const ctx = document.getElementById('performanceChart').getContext('2d');
-
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, '#1b5e4b');
-        gradient.addColorStop(1, '#0f3d2e');
-
-        new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: data.labels,
-            datasets: [{
-              data: data.averages,
-              backgroundColor: gradient,
-              borderRadius: 8
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: false
-              },
-              tooltip: {
-                callbacks: {
-                  label: (ctx) => `Score: ${ctx.raw}%`
-                }
-              }
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                max: 100,
-                ticks: {
-                  callback: (val) => val + "%"
-                }
-              }
-            }
-          }
-        });
-      } catch (e) {
-        console.error("Chart load failed", e);
-      }
-    }
-    loadChart();
-    <% } %>
-  </script>
+  <%- include('footer') %>
+  <script src="/js/profile.js"></script>
 </body>
-
 </html>
