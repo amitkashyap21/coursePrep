@@ -7,81 +7,28 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <%- include('header') %>
     <style>
-        :root {
-            --primary-dark: #0f3d2e;
-            --secondary-green: #1b5e4b;
-            --bg-light: #f4f7f6;
-        }
-
-        body {
-            background-color: var(--bg-light);
-        }
-
-        .topics-container {
-            max-width: 1000px;
-            margin: 60px auto;
-            padding: 0 20px;
-            text-align: center;
-        }
-
-        .topics-container h1 {
-            font-size: 32px;
-            color: var(--primary-dark);
-            margin-bottom: 10px;
-        }
-
-        .topics-container p {
-            color: #666;
-            margin-bottom: 40px;
-        }
-
-        .topics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 25px;
-        }
-
+        /* Existing Styles */
+        :root { --primary-dark: #0f3d2e; --secondary-green: #1b5e4b; --bg-light: #f4f7f6; }
+        body { background-color: var(--bg-light); font-family: 'Segoe UI', sans-serif; }
+        .topics-container { max-width: 1000px; margin: 60px auto; padding: 0 20px; text-align: center; }
+        .topics-container h1 { font-size: 32px; color: var(--primary-dark); margin-bottom: 10px; }
+        .topics-container p { color: #666; margin-bottom: 40px; }
+        .topics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
+        
         .topic-card {
-            background: white;
-            padding: 40px 20px;
-            border-radius: 15px;
-            text-decoration: none;
-            color: var(--primary-dark);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 1.5px solid transparent;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
+            background: white; padding: 40px 20px; border-radius: 15px;
+            text-decoration: none; color: var(--primary-dark);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1.5px solid transparent;
+            transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 15px;
         }
 
-        .topic-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary-dark);
-            box-shadow: 0 8px 25px rgba(15, 61, 46, 0.15);
-        }
+        .topic-card:hover { transform: translateY(-10px); border-color: var(--primary-dark); box-shadow: 0 8px 25px rgba(15, 61, 46, 0.15); }
+        .topic-icon { font-size: 40px; color: var(--secondary-green); transition: transform 0.3s ease; }
+        .topic-card:hover .topic-icon { transform: scale(1.1); }
+        .topic-card h3 { font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .start-btn { font-size: 14px; font-weight: 600; color: var(--secondary-green); }
 
-        .topic-icon {
-            font-size: 40px;
-            color: var(--secondary-green);
-        }
-
-        .topic-card h3 {
-            font-size: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .start-btn {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--secondary-green);
-        }
-
-        @media (max-width: 600px) {
-            .topics-grid { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 600px) { .topics-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -90,12 +37,18 @@
     <h1>Preparation Topics</h1>
     <p>Select a subject to test your knowledge with 5 random questions.</p>
 
-    <div class="topics-grid">
+    <div style="margin-bottom: 30px;">
+        <input type="text" id="topicSearch" placeholder="Search topics..." 
+               style="padding: 10px 20px; border-radius: 25px; border: 1px solid #ddd; width: 100%; max-width: 400px;">
+    </div>
+
+    <div class="topics-grid" id="topicsGrid">
         <% topics.forEach(topic => { %>
-            <a href="/quiz/<%= topic %>?user=<%= username %>&email=<%= email %>" class="topic-card">
+            <a href="/quiz/<%= topic %>?user=<%= username %>&email=<%= email %>" 
+               class="topic-card" 
+               data-topic-name="<%= topic.toLowerCase() %>">
                 <div class="topic-icon">
-                    <i class="fa-solid fa-code"></i>
-                </div>
+                    <i class="fa-solid fa-code"></i> </div>
                 <h3><%= topic %></h3>
                 <span class="start-btn">Start Quiz <i class="fa-solid fa-arrow-right"></i></span>
             </a>
@@ -111,6 +64,6 @@
 </div>
 
 <%- include('footer') %>
-
+<script src="/js/topics.js"></script>
 </body>
 </html>
