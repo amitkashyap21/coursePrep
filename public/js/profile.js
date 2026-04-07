@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         summary.addEventListener('click', () => {
             const card = summary.closest('.quiz-card');
             const details = card.querySelector('.quiz-details');
-            
+
             const isOpen = details.style.display === "block";
             details.style.display = isOpen ? "none" : "block";
             card.classList.toggle('active', !isOpen);
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: email })
                 });
-                
+
                 if (res.ok) {
                     window.location.href = '/login';
                 } else {
