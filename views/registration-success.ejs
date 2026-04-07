@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Recovery Codes | CoursePrep</title>
+    <%- include('header') %>
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 80px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .success-icon {
+            font-size: 50px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        .code-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 30px 0;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px dashed #0f3d2e;
+        }
+        .code-card {
+            background: white;
+            padding: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 18px;
+            color: #0f3d2e;
+            border: 1px solid #eee;
+            letter-spacing: 1px;
+        }
+        .warning-box {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        .btn-continue {
+            display: inline-block;
+            background: #0f3d2e;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.3s;
+            border: none;
+        }
+        .btn-continue:hover {
+            background: #16523f;
+            transform: translateY(-2px);
+            color: white;
+        }
+        @media print {
+            .btn-continue, button, .header, .footer { display: none !important; }
+            .success-container { box-shadow: none; margin: 0; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="success-container">
+    <div class="success-icon">
+        <i class="fa-solid fa-circle-check"></i>
+    </div>
+
+    <h2>
+        <%= (typeof isRegenerating !== 'undefined' && isRegenerating) ? 'New Codes Generated' : 'Registration Successful!' %>
+    </h2>
+
+    <p>
+        <%= (typeof isRegenerating !== 'undefined' && isRegenerating) 
+            ? 'Your recovery codes have been successfully reset.' 
+            : 'Welcome, <strong>' + username + '</strong>. Your account is ready.' %>
+    </p>
+
+    <div class="warning-box">
+        <strong>⚠️ IMPORTANT: Save your Recovery Codes!</strong><br>
+        If you forget your password, these are the <b>only</b> way to regain access. 
+        <% if (typeof isRegenerating !== 'undefined' && isRegenerating) { %>
+            Your <b>old codes</b> have been deactivated and will no longer work.
+        <% } else { %>
+            Copy them now or print this page. You will not see these specific codes again.
+        <% } %>
+    </div>
+
+    <div class="code-grid">
+        <% codes.forEach(code => { %>
+            <div class="code-card"><%= code %></div>
+        <% }) %>
+    </div>
+
+    <button onclick="window.print()" style="margin-bottom: 20px; cursor: pointer; background: none; border: 1px solid #ccc; padding: 8px 15px; border-radius: 6px; font-weight: 500;">
+        <i class="fa-solid fa-print"></i> Print These Codes
+    </button>
+    
+    <br>
+
+    <div style="margin-top: 10px;">
+        <% if (typeof isRegenerating !== 'undefined' && isRegenerating) { %>
+            <a href="/profile" class="btn-continue">
+                <i class="fa-solid fa-arrow-left"></i> Return to Profile
+            </a>
+        <% } else { %>
+            <a href="/login" class="btn-continue">
+                Proceed to Login <i class="fa-solid fa-right-to-bracket"></i>
+            </a>
+        <% } %>
+    </div>
+</div>
+
+<%- include('footer') %>
+</body>
+</html>
