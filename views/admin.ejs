@@ -6,254 +6,326 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | CoursePrep</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+
     <%- include('header') %>
 
-    <style>
-        :root {
-            --primary-dark: #0f3d2e;
-            --secondary-green: #1b5e4b;
-            --bg-light: #f4f7f6;
-            --danger-red: #d32f2f;
-        }
+        <style>
+            :root {
+                --primary-dark: #0f3d2e;
+                --secondary-green: #1b5e4b;
+                --bg-light: #f4f7f6;
+                --danger-red: #d32f2f;
+            }
 
-        body { 
-            background-color: var(--bg-light); 
-            color: #222; 
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
+            body {
+                background-color: var(--bg-light);
+                color: #222;
+                font-family: 'Segoe UI', Arial, sans-serif;
+            }
 
-        .admin-hero {
-            padding: 60px 20px;
-            background: linear-gradient(135deg, var(--primary-dark), var(--secondary-green));
-            color: white;
-            text-align: center;
-        }
+            .admin-hero {
+                padding: 60px 20px;
+                background: linear-gradient(135deg, var(--primary-dark), var(--secondary-green));
+                color: white;
+                text-align: center;
+            }
 
-        .admin-hero h1 { font-size: 32px; margin-bottom: 10px; }
-        
-        .back-link { 
-            color: #a8d5ba; 
-            text-decoration: none; 
-            font-size: 14px; 
-            display: inline-block; 
-            margin-top: 10px; 
-        }
-        .back-link:hover { text-decoration: underline; }
+            .admin-hero h1 {
+                font-size: 32px;
+                margin-bottom: 10px;
+            }
 
-        .admin-container {
-            max-width: 1200px;
-            margin: -40px auto 40px;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 30px;
-        }
+            .back-link {
+                color: #a8d5ba;
+                text-decoration: none;
+                font-size: 14px;
+                display: inline-block;
+                margin-top: 10px;
+            }
 
-        .admin-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        }
+            .back-link:hover {
+                text-decoration: underline;
+            }
 
-        .admin-card h3 {
-            color: var(--primary-dark);
-            margin-bottom: 20px;
-            border-bottom: 2px solid var(--bg-light);
-            padding-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+            .admin-container {
+                max-width: 1200px;
+                margin: -40px auto 40px;
+                padding: 0 20px;
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                gap: 30px;
+            }
 
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: 600; color: #444; font-size: 14px; }
-        
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-        }
+            .admin-card {
+                background: white;
+                padding: 25px;
+                border-radius: 12px;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+                margin-bottom: 20px;
+            }
 
-        .primary-btn {
-            display: inline-block;
-            background: var(--primary-dark);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            transition: 0.3s;
-        }
+            .admin-card h3 {
+                color: var(--primary-dark);
+                margin-bottom: 20px;
+                border-bottom: 2px solid var(--bg-light);
+                padding-bottom: 10px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
 
-        .primary-btn:hover { background: var(--secondary-green); transform: translateY(-2px); }
+            .form-group {
+                margin-bottom: 15px;
+            }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; background: var(--bg-light); color: var(--primary-dark); padding: 12px; font-size: 14px; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+            label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: 600;
+                color: #444;
+                font-size: 14px;
+            }
 
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .role-admin { background: #e8f5e9; color: #2e7d32; }
-        .role-student { background: #e3f2fd; color: #1565c0; }
+            input,
+            select,
+            textarea {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 14px;
+            }
 
-        .delete-link { 
-            color: var(--danger-red); 
-            cursor: pointer; 
-            font-weight: bold; 
-            padding: 5px 10px;
-            border-radius: 4px;
-            transition: 0.2s;
-        }
-        .delete-link:hover { background: #ffebee; }
+            .primary-btn {
+                display: inline-block;
+                background: var(--primary-dark);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                border: none;
+                cursor: pointer;
+                width: 100%;
+                transition: 0.3s;
+            }
 
-        .upload-box {
-            border: 2px dashed #ccc;
-            padding: 20px;
-            text-align: center;
-            border-radius: 8px;
-            background: #fafafa;
-            transition: 0.3s;
-        }
-        .upload-box:hover { border-color: var(--secondary-green); background: #f0fdf4; }
+            .primary-btn:hover {
+                background: var(--secondary-green);
+                transform: translateY(-2px);
+            }
 
-        .template-link {
-            font-size: 11px;
-            color: var(--secondary-green);
-            text-decoration: underline;
-            float: right;
-            cursor: pointer;
-        }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 10px;
+            }
 
-        @media (max-width: 900px) {
-            .admin-container { grid-template-columns: 1fr; }
-        }
-    </style>
+            th {
+                text-align: left;
+                background: var(--bg-light);
+                color: var(--primary-dark);
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            td {
+                padding: 12px;
+                border-bottom: 1px solid #eee;
+                font-size: 14px;
+            }
+
+            .status-badge {
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 11px;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+
+            .role-admin {
+                background: #e8f5e9;
+                color: #2e7d32;
+            }
+
+            .role-student {
+                background: #e3f2fd;
+                color: #1565c0;
+            }
+
+            .delete-link {
+                color: var(--danger-red);
+                cursor: pointer;
+                font-weight: bold;
+                padding: 5px 10px;
+                border-radius: 4px;
+                transition: 0.2s;
+            }
+
+            .delete-link:hover {
+                background: #ffebee;
+            }
+
+            .upload-box {
+                border: 2px dashed #ccc;
+                padding: 20px;
+                text-align: center;
+                border-radius: 8px;
+                background: #fafafa;
+                transition: 0.3s;
+            }
+
+            .upload-box:hover {
+                border-color: var(--secondary-green);
+                background: #f0fdf4;
+            }
+
+            .template-link {
+                font-size: 11px;
+                color: var(--secondary-green);
+                text-decoration: underline;
+                float: right;
+                cursor: pointer;
+            }
+
+            @media (max-width: 900px) {
+                .admin-container {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
 </head>
 
 <body>
 
-<div class="admin-hero">
-    <h1>Admin Command Center</h1>
-    <p>Logged in as: <strong><%= username %></strong></p>
-    <a href="/profile?user=<%= username %>" class="back-link">
-        <i class="fa-solid fa-arrow-left"></i> Back to My Profile
-    </a>
-</div>
-
-<div class="admin-container">
-    <div class="side-panel">
-        <div class="admin-card">
-            <h3><i class="fa-solid fa-plus-circle"></i> Add Single Question</h3>
-            <form id="addQuestionForm" action="/api/admin/add-question" method="POST">
-                <div class="form-group">
-                    <label for="topicSelect">Topic / Stream</label>
-                    <select name="topic" id="topicSelect" required>
-                        <option value="nodejs">Node.js</option>
-                        <option value="dbms">DBMS</option>
-                        <option value="java">Java</option>
-                        <option value="linux">Linux</option>
-                        <option value="cn">Computer Networks</option>
-                        <option value="cpp">C++</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Question Text</label>
-                    <textarea name="question" rows="3" placeholder="Enter question text..." required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Options (Comma separated)</label>
-                    <input type="text" name="options" placeholder="Opt1, Opt2, Opt3, Opt4" required>
-                </div>
-                <div class="form-group">
-                    <label>Correct Option Index (0-3)</label>
-                    <input type="number" name="answer" min="0" max="3" value="0" required>
-                </div>
-                <button type="submit" class="primary-btn">Update Question Bank</button>
-            </form>
-        </div>
-
-        <div class="admin-card">
-            <span class="template-link" id="viewSampleBtn">View Sample Format</span>
-            <h3><i class="fa-solid fa-file-import"></i> Bulk Upload (JSON)</h3>
-            <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Add multiple questions at once via JSON file.</p>
-            
-            <form action="/api/admin/upload-questions" method="POST" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label>Target Topic Name</label>
-                    <input type="text" name="topic" placeholder="e.g. nodejs" required>
-                </div>
-                <div class="form-group">
-                    <div class="upload-box">
-                        <input type="file" name="jsonFile" accept=".json" required>
-                    </div>
-                </div>
-                <button type="submit" class="primary-btn">Upload & Append</button>
-            </form>
-        </div>
+    <div class="admin-hero">
+        <h1>Admin Command Center</h1>
+        <p>Logged in as: <strong>
+                <%= username %>
+            </strong></p>
+        <a href="/profile?user=<%= username %>" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i> Back to My Profile
+        </a>
     </div>
 
-    <div class="main-panel">
-        <div class="admin-card">
-            <h3><i class="fa-solid fa-users-gear"></i> User Management</h3>
-            <p style="margin-bottom: 15px; color: #666; font-size: 13px;">Monitor active users and manage access levels.</p>
-            
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% users.forEach(user => { %>
-                            <tr id="user-<%= user.email.replace(/[@.]/g, '') %>">
-                                <td><%= user.username %></td>
-                                <td><%= user.email %></td>
-                                <td>
-                                    <span class="status-badge role-<%= user.role %>">
-                                        <%= user.role %>
-                                    </span>
-                                </td>
-                                <td>
-                                    <% if(user.role !== 'admin') { %>
-                                        <a class="delete-link" 
-                                           onclick="deleteUser('<%= user.email %>', '<%= user.username %>')">
-                                            <i class="fa-solid fa-trash-can"></i> Remove
-                                        </a>
-                                    <% } else { %>
-                                        <span style="color: #bbb; font-size: 12px;">
-                                            <i class="fa-solid fa-lock"></i> Protected
-                                        </span>
-                                    <% } %>
-                                </td>
+    <div class="admin-container">
+        <div class="side-panel">
+            <div class="admin-card">
+                <h3><i class="fa-solid fa-plus-circle"></i> Add Single Question</h3>
+                <form id="addQuestionForm" action="/api/admin/add-question" method="POST">
+                    <div class="form-group">
+                        <label for="topicSelect">Topic / Stream</label>
+                        <select name="topic" id="topicSelect" required>
+                            <option value="nodejs">Node.js</option>
+                            <option value="dbms">DBMS</option>
+                            <option value="java">Java</option>
+                            <option value="linux">Linux</option>
+                            <option value="cn">Computer Networks</option>
+                            <option value="cpp">C++</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="difficultySelect">Difficulty Level</label>
+                        <select name="difficulty" id="difficultySelect">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Question Text</label>
+                        <textarea name="question" rows="3" placeholder="Enter question text..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Options (Comma separated)</label>
+                        <input type="text" name="options" placeholder="Opt1, Opt2, Opt3, Opt4" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Correct Option Index (0-3)</label>
+                        <input type="number" name="answer" min="0" max="3" value="0" required>
+                    </div>
+                    <button type="submit" class="primary-btn">Update Question Bank</button>
+                </form>
+            </div>
+
+            <div class="admin-card">
+                <span class="template-link" id="viewSampleBtn">View Sample Format</span>
+                <h3><i class="fa-solid fa-file-import"></i> Bulk Upload (JSON)</h3>
+                <p style="font-size: 11px; color: #666; margin-bottom: 15px;">
+                    Include <code>"difficulty": "medium"</code> in your objects.
+                </p>
+
+                <form action="/api/admin/upload-questions" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Target Topic Name</label>
+                        <input type="text" name="topic" placeholder="e.g. nodejs" required>
+                    </div>
+                    <div class="form-group">
+                        <div class="upload-box">
+                            <input type="file" name="jsonFile" accept=".json" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="primary-btn">Upload & Append</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="main-panel">
+            <div class="admin-card">
+                <h3><i class="fa-solid fa-users-gear"></i> User Management</h3>
+                <p style="margin-bottom: 15px; color: #666; font-size: 13px;">Monitor active users and manage access
+                    levels.</p>
+
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Action</th>
                             </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <% users.forEach(user=> { %>
+                                <tr id="user-<%= user.email.replace(/[@.]/g, '') %>">
+                                    <td>
+                                        <%= user.username %>
+                                    </td>
+                                    <td>
+                                        <%= user.email %>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge role-<%= user.role %>">
+                                            <%= user.role %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <% if(user.role !=='admin' ) { %>
+                                            <a class="delete-link"
+                                                onclick="deleteUser('<%= user.email %>', '<%= user.username %>')">
+                                                <i class="fa-solid fa-trash-can"></i> Remove
+                                            </a>
+                                            <% } else { %>
+                                                <span style="color: #bbb; font-size: 12px;">
+                                                    <i class="fa-solid fa-lock"></i> Protected
+                                                </span>
+                                                <% } %>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<%- include('footer') %>
+    <%- include('footer') %>
 
-<script src="/js/admin-logic.js"></script>
+        <script src="/js/admin-logic.js"></script>
 
 </body>
 </html>

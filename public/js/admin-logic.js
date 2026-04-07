@@ -5,7 +5,6 @@
 
 /**
  * Global function for deleting users
- * Matches the logic used in admin.ejs
  */
 async function deleteUser(email, username) {
     // 1. Confirm with the admin
@@ -25,7 +24,6 @@ async function deleteUser(email, username) {
 
         if (data.success) {
             // 3. Match the ID generation logic from admin.ejs
-            // This removes special characters to match the row's ID
             const rowId = `user-${email.replace(/[@.]/g, '')}`;
             const row = document.getElementById(rowId);
             
@@ -40,7 +38,6 @@ async function deleteUser(email, username) {
                     row.remove();
                 }, 400);
             } else {
-                // Fallback: if we can't find the row, just refresh to show updated list
                 window.location.reload();
             }
         } else {
@@ -53,8 +50,7 @@ async function deleteUser(email, username) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 4. Sample Format Alert
-    // Note: ID changed to 'viewSampleBtn' to match the updated EJS
+    // 4. Sample Format Alert (Updated with Difficulty)
     const templateBtn = document.getElementById('viewSampleBtn') || document.getElementById('downloadTemplate');
     
     if (templateBtn) {
@@ -68,14 +64,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         "Computer Style Sheets", 
                         "Colorful Style Sheets"
                     ],
-                    "answer": 1
+                    "answer": 1,
+                    "difficulty": "easy" 
                 }
             ];
             
-            // Using a template literal for better readability in the alert
             const alertMsg = "Upload a .json file using this structure:\n\n" + 
                            JSON.stringify(sampleFormat, null, 2) + 
-                           "\n\nNote: 'answer' is the 0-based index of the correct option.";
+                           "\n\nNote:\n- 'answer' is the 0-based index.\n- 'difficulty' can be 'easy', 'medium', or 'hard'.";
             
             alert(alertMsg);
         });
