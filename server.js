@@ -179,6 +179,7 @@ app.get('/quiz/:topic', isAuthenticated, async (req, res) => {
 // AUTH & ACCOUNT API
 // =====================
 
+
 app.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
     try {
@@ -193,16 +194,45 @@ app.post('/register', async (req, res) => {
             return res.status(400).send("User already exists. <a href='/register'>Back</a>");
         }
 
+        // 1. Hash the main password
         const hashedPassword = await bcrypt.hash(password, 10);
-        await new User({
+
+        // 2. Generate 6 Backup Codes
+        const plainBackupCodes = [];
+        const hashedBackupCodes = [];
+
+        for (let i = 0; i < 6; i++) {
+            // Generate a random 8-character string
+            const plainCode = crypto.randomBytes(4).toString('hex');
+            plainBackupCodes.push(plainCode);
+
+            // Hash the code for database storage (Security Best Practice)
+            const hashedCode = await bcrypt.hash(plainCode, 10);
+            hashedBackupCodes.push({ code: hashedCode, used: false });
+        }
+
+        // 3. Create and Save the User
+        const newUser = new User({
             username,
             email: normalizedEmail,
             password: hashedPassword,
-            role: 'student'
-        }).save();
+            role: 'student',
+            backupCodes: hashedBackupCodes // Saving the hashed versions
+        });
 
-        res.send(`<script>alert("Success!"); window.location.href="/login";</script>`);
-    } catch (error) { res.status(500).send("Registration Error"); }
+        await newUser.save();
+
+        // 4. Show the PLAIN codes to the user so they can save them
+        // We use res.render here because an alert isn't safe for 6 codes
+        res.render('registration-success', { 
+            username: username, 
+            codes: plainBackupCodes 
+        });
+
+    } catch (error) { 
+        console.error(error);
+        res.status(500).send("Registration Error"); 
+    }
 });
 
 app.post('/login', async (req, res) => {
@@ -320,15 +350,18 @@ app.get('/api/user-stats', isAuthenticated, async (req, res) => {
 
 app.post('/api/admin/add-question', isAdmin, async (req, res) => {
     try {
-        const { topic, question, options, answer } = req.body;
+        const { topic, question, options, answer, difficulty } = req.body;
         await new Question({
             topic: topic.toLowerCase(),
             question,
             options: options.split(',').map(s => s.trim()),
-            answer: parseInt(answer)
+            answer: parseInt(answer),
+            difficulty: difficulty || 'medium' // Captures the new dropdown value
         }).save();
         res.redirect('/admin-dashboard');
-    } catch (e) { res.status(500).send("Error adding question"); }
+    } catch (e) { 
+        res.status(500).send("Error adding question"); 
+    }
 });
 
 app.post('/api/admin/upload-questions', isAdmin, upload.single('jsonFile'), async (req, res) => {
@@ -344,16 +377,17 @@ app.post('/api/admin/upload-questions', isAdmin, upload.single('jsonFile'), asyn
             topic: topic.toLowerCase().trim(),
             question: q.question,
             options: q.options,
-            answer: parseInt(q.answer)
+            answer: parseInt(q.answer),
+            // Logic: Use JSON difficulty if present, else default to 'medium'
+            difficulty: q.difficulty ? q.difficulty.toLowerCase() : 'medium'
         }));
 
         await Question.insertMany(formattedQuestions);
         fs.unlinkSync(req.file.path);
         res.send(`<script>alert("Bulk Upload Success!"); window.location.href="/admin-dashboard";</script>`);
     } catch (e) {
-        if (req.file) fs.unlinkSync(req.file.path); // Always clean up on error
+        if (req.file) fs.unlinkSync(req.file.path); 
         res.status(400).send("Error: Invalid JSON format or missing fields.");
     }
 });
-
 app.listen(PORT, () => console.log(`🚀 Server running: http://localhost:${PORT}`));
