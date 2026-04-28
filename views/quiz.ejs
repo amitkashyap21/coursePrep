@@ -1,72 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= topic.toUpperCase() %> Quiz | CoursePrep</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <%- include('header') %>
-    <style>
-        /* Modern Quiz Styles */
-        :root { --primary-dark: #0f3d2e; --secondary-green: #1b5e4b; --bg-light: #f4f7f6; }
-        body { background-color: var(--bg-light); font-family: 'Segoe UI', sans-serif; }
-        .quiz-container { max-width: 800px; margin: 50px auto; padding: 0 20px; }
-        .quiz-header { background: white; padding: 30px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center; }
-        .quiz-header h1 { color: var(--primary-dark); text-transform: uppercase; font-size: 24px; }
-        .question-card { background: white; padding: 30px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03); border-left: 5px solid var(--secondary-green); }
-        .question-text { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #333; }
-        .option-label { display: block; padding: 12px 15px; margin-bottom: 10px; border: 1.5px solid #eee; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-        .option-label:hover { background: #f9fdfc; border-color: var(--secondary-green); }
-        input[type="radio"] { margin-right: 12px; accent-color: var(--primary-dark); }
-        .submit-section { text-align: center; margin-top: 40px; }
-        .btn-submit { background: var(--primary-dark); color: white; padding: 15px 50px; border: none; border-radius: 10px; font-size: 18px; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        .btn-submit:hover { background: var(--secondary-green); transform: translateY(-2px); }
-        .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
-    </style>
+        <style>
+            :root {
+                --primary-dark: #0f3d2e;
+                --secondary-green: #1b5e4b;
+                --bg-light: #f4f7f6;
+            }
+
+            body {
+                background-color: var(--bg-light);
+            }
+
+            .quiz-container {
+                max-width: 800px;
+                margin: 50px auto;
+                padding: 0 20px;
+            }
+
+            .question-card {
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+                border-left: 5px solid var(--secondary-green);
+            }
+
+            .option-label {
+                display: block;
+                padding: 12px 15px;
+                margin-bottom: 10px;
+                border: 1.5px solid #eee;
+                border-radius: 8px;
+                cursor: pointer;
+            }
+
+            .btn-submit {
+                background: var(--primary-dark);
+                color: white;
+                padding: 15px 50px;
+                border: none;
+                border-radius: 10px;
+                font-size: 18px;
+                cursor: pointer;
+            }
+
+            .hidden {
+                display: none;
+            }
+        </style>
 </head>
 
 <body>
-    <div class="quiz-container" 
-         id="quiz-meta" 
-         data-topic="<%= topic %>" 
-         data-total-questions="<%= questions.length %>">
-        
-        <div class="quiz-header">
-            <h1><%= topic %> Quiz</h1>
-            <div style="color: #666;">
-                <i class="fa-solid fa-file-lines"></i> <%= questions.length %> Questions
-            </div>
+    <div class="quiz-container" id="quiz-meta" data-topic="<%= topic %>" data-total-questions="<%= questions.length %>"
+        data-room="<%= room %>">
+
+        <div class="quiz-header" style="background:white; padding:20px; border-radius:15px; margin-bottom:20px;">
+            <h1>
+                <%= topic.toUpperCase() %> Quiz
+            </h1>
         </div>
 
         <form id="quizForm">
-            <% questions.forEach((q, index) => { %>
-                <div class="question-card" data-question-id="<%= index %>">
-                    <p class="question-text"><%= index + 1 %>. <%= q.question %></p>
-                    <div class="options">
-                        <% q.options.forEach((option, optIndex) => { %>
-                            <label class="option-label">
-                                <input type="radio" 
-                                       name="q<%= index %>" 
-                                       value="<%= option %>"
-                                       data-correct-index="<%= q.answer %>" 
-                                       data-question-text="<%= q.question %>" 
-                                       required>
-                                <%= option %>
-                            </label>
+            <% questions.forEach((q, index)=> { %>
+                <div class="question-card">
+                    <p><strong>
+                            <%= index + 1 %>. <%= q.question %>
+                        </strong></p>
+                    <% q.options.forEach((option)=> { %>
+                        <label class="option-label">
+                            <input type="radio" name="q<%= index %>" value="<%= option %>"
+                                data-correct-index="<%= q.answer %>" data-question-text="<%= q.question %>" required>
+                            <%= option %>
+                        </label>
                         <% }) %>
-                    </div>
                 </div>
-            <% }) %>
-
-            <div class="submit-section">
-                <button type="button" id="submitBtn" class="btn-submit">
-                    Submit Assessment
-                </button>
-            </div>
+                <% }) %>
+                    <div style="text-align:center;">
+                        <button type="button" id="submitBtn" class="btn-submit">Submit Assessment</button>
+                    </div>
         </form>
     </div>
 
     <%- include('footer') %>
-    <script src="/js/quiz.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/js/quiz.js"></script>
 </body>
+
 </html>

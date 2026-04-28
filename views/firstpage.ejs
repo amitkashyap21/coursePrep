@@ -10,111 +10,153 @@
 
     <%- include('header') %>
 
-        <style>
-            /* Keep your existing CSS here or move to /public/css/style.css */
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-                font-family: Arial, sans-serif;
-            }
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-            body {
-                background-color: #f4f7f6;
-                color: #222;
-            }
+        body {
+            background-color: #f4f7f6;
+            color: #222;
+        }
 
-            .hero {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                flex-direction: column;
-                text-align: center;
-                padding: 100px 20px;
-                color: white;
-                background: linear-gradient(to bottom right, #0f3d2e, #1b5e4b);
-            }
+        .hero {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 100px 20px;
+            color: white;
+            background: linear-gradient(to bottom right, #0f3d2e, #1b5e4b);
+        }
 
-            .hero h1 {
-                font-size: 40px;
-                margin-bottom: 20px;
-            }
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
 
-            .hero p {
-                max-width: 700px;
-                font-size: 18px;
-                line-height: 1.6;
-                margin-bottom: 30px;
-            }
+        .hero p {
+            max-width: 700px;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 35px;
+            opacity: 0.9;
+        }
 
-            .buttons {
-                display: flex;
-                gap: 20px;
-            }
+        .buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
-            .buttons a {
-                padding: 12px 25px;
-                border-radius: 8px;
-                text-decoration: none;
-                font-weight: 600;
-                transition: 0.3s;
-            }
+        .buttons a {
+            padding: 14px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
 
-            .primary-btn {
-                background: white;
-                color: #0f3d2e;
-            }
+        .primary-btn {
+            background: white;
+            color: #0f3d2e;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
 
-            .primary-btn:hover {
-                background: #e8f5e9;
-            }
+        .primary-btn:hover {
+            background: #e8f5e9;
+            transform: translateY(-2px);
+        }
 
-            .secondary-btn {
-                border: 2px solid white;
-                color: white;
-            }
+        .secondary-btn {
+            border: 2px solid white;
+            color: white;
+        }
 
-            .secondary-btn:hover {
-                background: rgba(255, 255, 255, 0.1);
-            }
+        .secondary-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
 
-            .features {
-                padding: 80px 60px;
-                text-align: center;
-            }
+        /* Highlight button for Multiplayer */
+        .multi-btn {
+            background: #ffcc00;
+            color: #0f3d2e;
+        }
 
-            .features h2 {
-                margin-bottom: 40px;
-                font-size: 28px;
-                color: #0f3d2e;
-            }
+        .multi-btn:hover {
+            background: #ffdb4d;
+            transform: translateY(-2px);
+        }
 
-            .feature-box {
-                display: flex;
-                justify-content: space-around;
-                flex-wrap: wrap;
-                gap: 30px;
-            }
+        .features {
+            padding: 80px 40px;
+            text-align: center;
+        }
 
-            .card {
-                background: white;
-                padding: 30px;
-                width: 300px;
-                border-radius: 12px;
-                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-            }
+        .features h2 {
+            margin-bottom: 50px;
+            font-size: 32px;
+            color: #0f3d2e;
+        }
 
-            .card h3 {
-                margin-bottom: 15px;
-                color: #0f3d2e;
-            }
+        .feature-box {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
 
-            .card p {
-                font-size: 14px;
-                line-height: 1.6;
-                color: #555;
-            }
-        </style>
+        .card {
+            background: white;
+            padding: 40px 30px;
+            width: 320px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+        }
+
+        .card h3 {
+            margin-bottom: 15px;
+            color: #0f3d2e;
+            font-size: 22px;
+        }
+
+        .card p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        /* Multiplayer Card Special Style */
+        .card.special {
+            border: 2px solid #1b5e4b;
+            background: #f0fff4;
+        }
+
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: -30px;
+            background: #ff4444;
+            color: white;
+            padding: 5px 40px;
+            font-size: 12px;
+            font-weight: bold;
+            transform: rotate(45deg);
+        }
+    </style>
 </head>
 
 <body>
@@ -123,49 +165,56 @@
         <h1>Personalized Interview Preparation Platform</h1>
         <p>
             CoursePrep is a role-based web application that generates
-            customized interview questions based on your academic stream
-            or competitive exam. Prepare smarter with tailored content.
+            customized interview questions based on your academic stream.
+            Prepare smarter with tailored content and real-time competition.
         </p>
 
         <div class="buttons">
             <% if (user) { %>
-                <% if (user.role==='admin' ) { %>
+                <% if (user.role === 'admin') { %>
                     <a href="/admin-dashboard" class="primary-btn">Manage Platform</a>
                     <a href="/profile" class="secondary-btn">System Stats</a>
-                    <% } else { %>
-                        <a href="/questions" class="primary-btn">Go to Tests</a>
-                        <a href="/profile" class="secondary-btn">My Profile</a>
-                        <% } %>
-                            <% } else { %>
-                                <a href="/register" class="primary-btn">Get Started</a>
-                                <a href="/login" class="secondary-btn">Login</a>
-                                <% } %>
+                <% } else { %>
+                    <a href="/questions" class="primary-btn">Solo Tests</a>
+                    <a href="/multiplayer" class="multi-btn">Multiplayer Lobby</a>
+                    <a href="/profile" class="secondary-btn">My Profile</a>
+                <% } %>
+            <% } else { %>
+                <a href="/register" class="primary-btn">Get Started</a>
+                <a href="/login" class="secondary-btn">Login</a>
+            <% } %>
         </div>
     </div>
 
     <div class="features">
-        <h2>How The System Works</h2>
+        <h2>Explore Our Features</h2>
         <div class="feature-box">
             <div class="card">
-                <h3>For Users</h3>
-                <p>Enter your academic stream and instantly receive relevant interview questions curated to match your
-                    goals.</p>
+                <h3>Tailored Path</h3>
+                <p>Enter your academic stream and instantly receive relevant interview questions curated to match your specific goals.</p>
             </div>
-            <div class="card">
-                <h3>For Admins</h3>
-                <p>Manage the question bank, upload JSON files, and oversee user activity through a secure dashboard.
-                </p>
+
+            <div class="card special">
+                <div class="badge">NEW</div>
+                <h3>Battle Mode</h3>
+                <p>Create private rooms, challenge your friends in real-time, and climb the leaderboard together.</p>
             </div>
+
             <div class="card">
-                <h3>Smart & Scalable</h3>
-                <p>Built with MongoDB and role-based access control to ensure secure and efficient content delivery.</p>
+                <h3>Admin Control</h3>
+                <p>Admins can easily manage question banks and oversee user progress through a dedicated dashboard.</p>
+            </div>
+
+            <div class="card">
+                <h3>Smart Analytics</h3>
+                <p>Track your performance over time with visual stats and historical data stored securely on our cloud.</p>
             </div>
         </div>
     </div>
 
     <%- include('footer') %>
 
-        <script src="/js/firstpage.js"></script>
+    <script src="/js/firstpage.js"></script>
 
 </body>
 
