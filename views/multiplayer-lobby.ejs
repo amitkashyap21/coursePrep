@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Lobby | CoursePrep</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <%- include('header') %>
+        <style>
+            .lobby-hero {
+                background: linear-gradient(to bottom right, #0f3d2e, #1b5e4b);
+                padding: 60px 20px;
+                color: white;
+                text-align: center;
+            }
+
+            .lobby-container {
+                display: flex;
+                justify-content: center;
+                padding: 50px 20px;
+                min-height: 60vh;
+            }
+
+            .card {
+                background: white;
+                padding: 40px;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                width: 100%;
+                max-width: 500px;
+            }
+
+            .room-info {
+                background: #f0fff4;
+                border: 2px dashed #1b5e4b;
+                padding: 20px;
+                border-radius: 10px;
+                margin: 20px 0;
+                text-align: center;
+            }
+
+            .room-code {
+                font-size: 2.8rem;
+                font-weight: bold;
+                color: #0f3d2e;
+                letter-spacing: 5px;
+                margin: 10px 0;
+            }
+
+            .player-list {
+                list-style: none;
+                padding: 0;
+                margin: 20px 0;
+            }
+
+            .player-item {
+                padding: 12px;
+                border-bottom: 1px solid #eee;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .status-dot {
+                height: 10px;
+                width: 10px;
+                background: #27ae60;
+                border-radius: 50%;
+            }
+
+            .btn-green {
+                background: #1b5e4b;
+                color: white;
+                border: none;
+                padding: 12px 25px;
+                border-radius: 8px;
+                cursor: pointer;
+                width: 100%;
+                font-weight: 600;
+                margin-top: 10px;
+                transition: 0.3s;
+            }
+
+            .btn-green:hover {
+                background: #0f3d2e;
+                transform: translateY(-2px);
+            }
+
+            .hidden {
+                display: none !important;
+            }
+
+            input[type="text"],
+            select,
+            input[type="number"] {
+                width: 100%;
+                padding: 12px;
+                margin: 10px 0;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-family: inherit;
+            }
+        </style>
+</head>
+
+<body>
+    <div class="lobby-hero">
+        <h1>Multiplayer Battle</h1>
+        <p>Real-time knowledge competition with your peers.</p>
+    </div>
+
+    <div class="lobby-container">
+        <div id="selection-view" class="card">
+            <button onclick="showCreateForm()" class="btn-green">Create Private Room</button>
+            <div style="margin: 20px 0; text-align: center; color: #666; font-size: 0.9rem;">OR JOIN EXISTING</div>
+            <input type="text" id="join-code" placeholder="ENTER 6-DIGIT CODE"
+                style="text-transform: uppercase; text-align: center; font-weight: bold; letter-spacing: 2px;">
+            <button onclick="joinRoom()" class="btn-green" style="background: #222;">Enter Room</button>
+        </div>
+
+        <div id="create-view" class="card hidden">
+            <h3>Match Settings</h3>
+            <label>Subject:</label>
+            <select id="room-topic">
+                <% if(topics && topics.length> 0) { %>
+                    <% topics.forEach(topic=> { %>
+                        <option value="<%= topic %>">
+                            <%= topic.toUpperCase() %>
+                        </option>
+                        <% }) %>
+                            <% } else { %>
+                                <option value="general">General Knowledge</option>
+                                <% } %>
+            </select>
+            <label>Players Capacity:</label>
+            <input type="number" id="room-players" value="4" min="2" max="10">
+            <button onclick="createRoom()" class="btn-green">Generate Room</button>
+            <button onclick="location.reload()"
+                style="background:none; border:none; color:#e74c3c; width:100%; margin-top:15px; cursor:pointer; font-weight: bold;">Cancel</button>
+        </div>
+
+        <div id="lobby-view" class="card hidden">
+            <h2 id="display-topic" style="color: #0f3d2e; margin-bottom: 5px;">Lobby</h2>
+            <div class="room-info">
+                <p style="margin:0; font-size: 0.8rem; color: #1b5e4b; font-weight: bold;">ROOM CODE</p>
+                <div class="room-code" id="display-code">------</div>
+                <p style="margin:0; font-size: 0.75rem; color: #666;">Invite your teammates using this code</p>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="margin:0;">Players</h4>
+                <span id="player-count-badge"
+                    style="background: #1b5e4b; color:white; padding: 2px 10px; border-radius: 20px; font-size: 0.8rem;">0</span>
+            </div>
+            <ul id="player-list" class="player-list"></ul>
+
+            <div id="admin-controls" class="hidden">
+                <button onclick="startQuiz()" class="btn-green" style="background: #f1c40f; color: #0f3d2e;">START
+                    BATTLE NOW</button>
+            </div>
+            <p id="wait-msg" style="text-align: center; color: #666; font-style: italic; font-size: 0.9rem;">Waiting for
+                host to start...</p>
+        </div>
+    </div>
+
+    <%- include('footer') %>
+
+        <script>
+            const socket = io();
+            const username = "<%= user.username %>";
+            const userEmail = "<%= user.email %>";
+
+            // Check URL for existing room (handles page refresh)
+            const urlParams = new URLSearchParams(window.location.search);
+            let currentRoomId = urlParams.get('room');
+
+            // --- NEW: REFRESH PERSISTENCE ---
+            if (currentRoomId) {
+                // If the URL has a room ID, tell the server we are back
+                socket.emit('init-session', { roomId: currentRoomId, username });
+            }
+
+            function showCreateForm() {
+                document.getElementById('selection-view').classList.add('hidden');
+                document.getElementById('create-view').classList.remove('hidden');
+            }
+
+            function createRoom() {
+                const settings = {
+                    topic: document.getElementById('room-topic').value,
+                    maxPlayers: document.getElementById('room-players').value
+                };
+                socket.emit('create-room', { settings, username });
+            }
+
+            function joinRoom() {
+                const roomId = document.getElementById('join-code').value.toUpperCase().trim();
+                if (!roomId) return alert("Please enter a code");
+                socket.emit('join-room', { roomId, username });
+            }
+
+            // --- Socket Listeners ---
+
+            socket.on('room-created', (roomId) => {
+                currentRoomId = roomId;
+                // Update URL without refreshing so refresh persistence works
+                const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?room=' + roomId;
+                window.history.pushState({ path: newurl }, '', newurl);
+
+                updateLobbyUI(roomId);
+                document.getElementById('admin-controls').classList.remove('hidden');
+                document.getElementById('wait-msg').classList.add('hidden');
+            });
+
+            socket.on('update-room', (room) => {
+                currentRoomId = room.id;
+                updateLobbyUI(room.id);
+
+                // --- PERSISTENT ADMIN CHECK ---
+                // If your username matches the room's adminName, show the Start button
+                if (room.adminName === username) {
+                    document.getElementById('admin-controls').classList.remove('hidden');
+                    document.getElementById('wait-msg').classList.add('hidden');
+                } else {
+                    document.getElementById('admin-controls').classList.add('hidden');
+                    document.getElementById('wait-msg').classList.remove('hidden');
+                }
+
+                // Ensure the URL has the room ID for refresh persistence
+                if (!window.location.search.includes('room=')) {
+                    const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?room=' + room.id;
+                    window.history.pushState({ path: newurl }, '', newurl);
+                }
+
+                document.getElementById('display-topic').innerText = room.settings.topic.toUpperCase();
+                document.getElementById('player-count-badge').innerText = room.members.length;
+
+                const list = document.getElementById('player-list');
+                list.innerHTML = room.members.map(m => `
+        <li class="player-item">
+            <span>
+                <strong>${m.username}</strong> ${m.username === username ? '(You)' : ''}
+                ${!m.online ? ' <small style="color:red;">(Disconnected...)</small>' : ''}
+            </span>
+            <span class="status-dot" style="background: ${m.online ? '#27ae60' : '#ccc'};"></span>
+        </li>
+    `).join('');
+            });
+
+            function updateLobbyUI(roomId) {
+                document.getElementById('selection-view').classList.add('hidden');
+                document.getElementById('create-view').classList.add('hidden');
+                document.getElementById('lobby-view').classList.remove('hidden');
+                document.getElementById('display-code').innerText = roomId;
+            }
+
+            socket.on('quiz-starting', (data) => {
+                window.location.href = `/questions?topic=${data.settings.topic}&room=${currentRoomId}&user=${username}&email=${userEmail}`;
+            });
+
+            socket.on('error-msg', (msg) => {
+                alert(msg);
+                // Clear URL if room is invalid
+                window.history.pushState({}, '', window.location.pathname);
+            });
+
+            function startQuiz() {
+                socket.emit('start-multiplayer-quiz', currentRoomId);
+            }
+        </script>
+</body>
+
+</html>

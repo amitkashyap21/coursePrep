@@ -13,7 +13,12 @@ const User = require('./models/User');
 const Mark = require('./models/Mark');
 const Question = require('./models/Question');
 
+// Socket
+const { setupSocket, activeRooms } = require('./socket');
+
 const app = express();
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
 const PORT = 3000;
 
 // =====================
@@ -88,14 +93,41 @@ const isAdmin = (req, res, next) => {
 // PAGE ROUTES
 // =====================
 
+app.get('/multiplayer', isAuthenticated, async (req, res) => {
+    try {
+        // Fetch unique topics from your existing Questions/Marks collection
+        // Replace 'Mark' with your actual Model name for questions
+        const availableTopics = await Mark.distinct('topic'); 
+
+        res.render('multiplayer-lobby', {
+            user: req.session.user,
+            topics: availableTopics // Pass these to the frontend
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).send("Error loading multiplayer lobby");
+    }
+});
+
 app.get('/', async (req, res) => {
     try {
         const studentCount = await User.countDocuments({ role: 'student' });
         const quizCount = await Mark.countDocuments();
+        
+        // Calculate the number of live rooms
+        const liveRoomCount = Object.keys(activeRooms).length;
+
         res.render('firstpage', {
-            stats: { totalUsers: studentCount, totalQuizzes: quizCount }
+            stats: { 
+                totalUsers: studentCount, 
+                totalQuizzes: quizCount,
+                liveRooms: liveRoomCount // Pass this new value
+            }
         });
-    } catch (e) { res.status(500).send("Error loading home"); }
+    } catch (e) { 
+        console.error(e);
+        res.status(500).send("Error loading home"); 
+    }
 });
 
 app.get('/login', (req, res) => {
@@ -150,9 +182,35 @@ app.get('/profile', isAuthenticated, async (req, res) => {
 app.get('/questions', isAuthenticated, async (req, res) => {
     try {
         const { username, email } = req.session.user;
+        const { topic, room } = req.query; // Get topic and room from URL
+
+        // CASE 1: Topic is selected (Multiplayer Start or Solo selection)
+        if (topic) {
+            // Fetch questions specifically for the selected topic
+            const questions = await Question.find({ topic: topic });
+
+            if (!questions || questions.length === 0) {
+                return res.status(404).send("No questions found for this topic.");
+            }
+
+            // Render the QUIZ page directly
+            return res.render('quiz', { 
+                questions, 
+                topic, 
+                room: room || null, // Pass room ID if it exists
+                username, 
+                email 
+            });
+        }
+
+        // CASE 2: No topic selected (Show selection page)
         const topics = await Question.distinct('topic');
         res.render('topics', { topics, username, email });
-    } catch (e) { res.status(500).send("Error loading topics."); }
+
+    } catch (e) {
+        console.error("Route Error:", e);
+        res.status(500).send("Error loading assessment.");
+    }
 });
 
 app.get('/quiz/:topic', isAuthenticated, async (req, res) => {
@@ -438,12 +496,30 @@ app.get('/logout', (req, res) => {
 app.post('/submit-quiz', isAuthenticated, async (req, res) => {
     try {
         const { topic, score, results } = req.body;
-        await new Mark({
+        
+        // Use req.session.user.email to ensure the marks are tied to the logged-in user
+        const newMark = new Mark({
             email: req.session.user.email,
-            topic, score, results
-        }).save();
-        res.json({ success: true });
-    } catch (err) { res.status(500).json({ success: false }); }
+            topic, 
+            score, 
+            results,
+            createdAt: new Date() // Good for sorting history later
+        });
+
+        await newMark.save();
+        
+        // Return success and perhaps the record ID for confirmation
+        res.json({ 
+            success: true, 
+            message: "Assessment saved successfully",
+            markId: newMark._id 
+        });
+        
+        console.log(`📊 Score Saved: ${req.session.user.username} got ${score} in ${topic}`);
+    } catch (err) { 
+        console.error("Save Error:", err);
+        res.status(500).json({ success: false, message: "Server error while saving score" }); 
+    }
 });
 
 app.get('/api/user-stats', isAuthenticated, async (req, res) => {
@@ -499,4 +575,9 @@ app.post('/api/admin/upload-questions', isAdmin, upload.single('jsonFile'), asyn
     }
 });
 
-app.listen(PORT, () => console.log(`🚀 Server running: http://localhost:${PORT}`));
+// =====================
+// REAL-TIME ROOMS (SOCKET.IO)
+// =====================
+setupSocket(io);
+
+http.listen(PORT, () => console.log(`🚀 Master Server running: http://localhost:${PORT}`));
