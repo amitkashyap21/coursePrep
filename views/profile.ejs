@@ -9,273 +9,315 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <%- include('header') %>
 
-  <style>
-    :root {
-      --primary-dark: #0f3d2e;
-      --secondary-green: #1b5e4b;
-      --danger: #d9534f;
-      --bg-light: #f4f7f6;
-    }
+    <style>
+      :root {
+        --primary-dark: #0f3d2e;
+        --secondary-green: #1b5e4b;
+        --danger: #d9534f;
+        --bg-light: #f4f7f6;
+        --empty-gray: #ebedf0;
+      }
 
-    body {
-      background-color: var(--bg-light);
-      padding-bottom: 50px;
-      font-family: 'Segoe UI', sans-serif;
-    }
+      body {
+        background-color: var(--bg-light);
+        padding-bottom: 50px;
+        font-family: 'Segoe UI', sans-serif;
+      }
 
-    .profile-container {
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
+      .profile-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+      }
 
-    .card,
-    .analytics-card,
-    .recovery-card {
-      background: white;
-      border-radius: 15px;
-      padding: 30px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-      margin-bottom: 30px;
-    }
+      .card,
+      .analytics-card,
+      .recovery-card,
+      .activity-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+      }
 
-    .card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+      .card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
 
-    .admin-stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
-    }
+      /* --- HEATMAP STYLES --- */
+      .heatmap-wrapper {
+        display: flex;
+        margin-top: 10px;
+      }
 
-    .stat-card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-      border-bottom: 4px solid var(--primary-dark);
-    }
+      .days-labels {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        margin-right: 10px;
+        padding-top: 30px;
+        /* Space for month labels */
+        padding-bottom: 5px;
+        font-size: 11px;
+        color: #888;
+      }
 
-    .quiz-card {
-      background: white;
-      border-radius: 12px;
-      margin-bottom: 15px;
-      border: 1px solid #e0e0e0;
-      overflow: hidden;
-    }
+      .heatmap-main {
+        flex-grow: 1;
+        overflow-x: auto;
+      }
 
-    .quiz-summary {
-      padding: 18px 25px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-    }
+      #month-labels {
+        display: flex;
+        font-size: 11px;
+        color: #888;
+        margin-bottom: 8px;
+        height: 15px;
+      }
 
-    .quiz-details {
-      display: none;
-      padding: 20px 25px;
-      border-top: 1px solid #eee;
-      background: #fdfdfd;
-    }
+      .heatmap-container {
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
 
-    .topic-badge {
-      background: rgba(15, 61, 46, 0.1);
-      color: var(--primary-dark);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-weight: 700;
-      text-transform: uppercase;
-      font-size: 11px;
-    }
+      .heatmap-grid {
+        display: grid;
+        grid-template-rows: repeat(7, 14px);
+        /* 7 days of the week */
+        grid-auto-flow: column;
+        grid-auto-columns: 14px;
+        grid-gap: 3px;
+      }
 
-    .chart-container {
-      position: relative;
-      margin: 20px auto;
-      height: 350px;
-      width: 100%;
-    }
+      .day-square {
+        width: 14px;
+        height: 14px;
+        border-radius: 2px;
+        background-color: var(--empty-gray);
+        transition: outline 0.1s;
+      }
 
-    .text-success {
-      color: #28a745;
-    }
+      .day-square:hover {
+        outline: 1px solid #555;
+      }
 
-    .text-danger {
-      color: #dc3545;
-    }
+      .active-1 {
+        background-color: #9be9a8;
+      }
 
-    .btn-delete {
-      background: none;
-      border: 1.5px solid var(--danger);
-      color: var(--danger);
-      padding: 8px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-    }
+      .active-2 {
+        background-color: #40c463;
+      }
 
-    .btn-delete:hover {
-      background: var(--danger);
-      color: white;
-    }
+      .active-3 {
+        background-color: #30a14e;
+      }
 
-    /* Recovery Section Styles */
-    .recovery-card {
-      border-left: 5px solid var(--primary-dark);
-    }
+      .active-4 {
+        background-color: #216e39;
+      }
 
-    .btn-regenerate {
-      width: 100%;
-      background: var(--primary-dark);
-      color: white;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.3s;
-      margin-top: 15px;
-    }
+      /* --- OTHER STYLES --- */
+      .quiz-card {
+        background: white;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #e0e0e0;
+        overflow: hidden;
+      }
 
-    .btn-regenerate:hover {
-      background: var(--secondary-green);
-      transform: translateY(-1px);
-    }
+      .quiz-summary {
+        padding: 18px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+      }
 
-    .status-badge {
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-  </style>
+      .quiz-details {
+        display: none;
+        padding: 20px 25px;
+        border-top: 1px solid #eee;
+        background: #fdfdfd;
+      }
+
+      .topic-badge {
+        background: rgba(15, 61, 46, 0.1);
+        color: var(--primary-dark);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 11px;
+      }
+
+      .chart-container {
+        position: relative;
+        margin: 20px auto;
+        height: 350px;
+        width: 100%;
+      }
+
+      .text-success {
+        color: #28a745;
+      }
+
+      .text-danger {
+        color: #dc3545;
+      }
+
+      .btn-delete {
+        background: none;
+        border: 1.5px solid var(--danger);
+        color: var(--danger);
+        padding: 8px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .recovery-card {
+        border-left: 5px solid var(--primary-dark);
+      }
+
+      .btn-regenerate {
+        width: 100%;
+        background: var(--primary-dark);
+        color: white;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-top: 15px;
+      }
+
+      .status-badge {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+    </style>
 </head>
 
 <body>
-  <div id="profile-data" data-user-role="<%= role %>" data-user-email="<%= email %>" data-has-marks="<%= marks && marks.length > 0 %>">
+  <div id="profile-data" data-user-role="<%= role %>" data-user-email="<%= email %>"
+    data-has-marks="<%= marks && marks.length > 0 %>">
   </div>
 
   <div class="profile-container">
+    <!-- User Welcome Card -->
     <div class="card">
       <div class="user-meta">
         <h2 style="color: var(--primary-dark); margin-bottom: 5px;">Welcome, <%= username %>!</h2>
-        <p style="color: #666; font-size: 14px;"><i class="fa-solid fa-envelope"></i> <%= email %></p>
+        <p style="color: #666; font-size: 14px;"><i class="fa-solid fa-envelope"></i>
+          <%= email %>
+        </p>
       </div>
       <div class="actions">
-        <% if (role === 'admin') { %>
-        <span style="background: #e8f5e9; color: #2e7d32; padding: 8px 15px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-          <i class="fa-solid fa-user-shield"></i> Admin Mode
-        </span>
-        <% } else { %>
-        <button class="btn-delete" id="deleteAccountBtn">
-          <i class="fa-solid fa-trash-can"></i> Delete Account
-        </button>
-        <% } %>
-      </div>
-    </div>
-
-    <% if (role !== 'admin') { %>
-    <h3 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fa-solid fa-shield-halved"></i> Security & Recovery</h3>
-    <div class="recovery-card">
-      <% 
-            const codes = (typeof backupCodes !== 'undefined') ? backupCodes : [];
-            const remaining = codes.filter(c => !c.used).length; 
-        %>
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <p style="margin: 0; font-weight: 600; color: #333;">Backup Recovery Codes</p>
-          <p style="margin: 5px 0 0; font-size: 13px; color: #777;">Used to reset password if you lose access.</p>
-        </div>
-        <div style="text-align: right;">
-          <span style="font-size: 20px; font-weight: bold; color: var(--primary-dark);"><%= remaining %> / 6</span>
-          <br>
-          <% if (remaining > 2) { %>
-          <span class="status-badge" style="background: #e8f5e9; color: #2e7d32;">SECURE</span>
-          <% } else if (remaining > 0) { %>
-          <span class="status-badge" style="background: #fff3e0; color: #ef6c00;">LOW</span>
+        <% if (role==='admin' ) { %>
+          <span style="background: #e8f5e9; color: #2e7d32; padding: 8px 15px; border-radius: 8px; font-weight: 600;">
+            <i class="fa-solid fa-user-shield"></i> Admin Mode
+          </span>
           <% } else { %>
-          <span class="status-badge" style="background: #ffebee; color: #c62828;">EXHAUSTED</span>
-          <% } %>
+            <button class="btn-delete" id="deleteAccountBtn">Delete Account</button>
+            <% } %>
+      </div>
+    </div>
+
+    <% if (role !=='admin' ) { %>
+      <!-- ACTIVITY HEATMAP SECTION -->
+      <h3 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fa-solid fa-calendar-days"></i> Activity
+        Status</h3>
+      <div class="activity-card">
+        <div class="heatmap-wrapper">
+          <div class="days-labels">
+            <span>Mon</span>
+            <span>Wed</span>
+            <span>Fri</span>
+          </div>
+          <div class="heatmap-main">
+            <div id="month-labels"></div>
+            <div class="heatmap-container">
+              <div id="heatmap" class="heatmap-grid"></div>
+            </div>
+          </div>
+        </div>
+        <div
+          style="display: flex; align-items: center; gap: 5px; margin-top: 15px; font-size: 12px; color: #888; justify-content: flex-end;">
+          <span>Less</span>
+          <div class="day-square"></div>
+          <div class="day-square active-1"></div>
+          <div class="day-square active-2"></div>
+          <div class="day-square active-3"></div>
+          <div class="day-square active-4"></div>
+          <span>More</span>
         </div>
       </div>
 
-      <form action="/api/regenerate-codes" method="POST" onsubmit="return confirm('Warning: Generating new codes will invalidate all your old ones. Do you want to proceed?')">
-        <button type="submit" class="btn-regenerate">
-          <i class="fa-solid fa-rotate"></i> <%= remaining === 0 ? 'Generate New Codes' : 'Reset & Regenerate Codes' %>
-        </button>
-      </form>
-    </div>
-    <% } %>
+      <!-- Security Section -->
+      <h3 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fa-solid fa-shield-halved"></i> Security &
+        Recovery</h3>
+      <div class="recovery-card">
+        <% const codes=(typeof backupCodes !=='undefined' ) ? backupCodes : []; const remaining=codes.filter(c=>
+          !c.used).length; %>
+          <div style="display: flex; justify-content: space-between;">
+            <p>Backup Recovery Codes: <strong>
+                <%= remaining %> / 6
+              </strong></p>
+          </div>
+          <form action="/api/regenerate-codes" method="POST">
+            <button type="submit" class="btn-regenerate">Regenerate Codes</button>
+          </form>
+      </div>
 
-    <% if (role === 'admin') { %>
-    <h3 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fa-solid fa-gauge-high"></i> Platform Stats</h3>
-    <div class="admin-stats-grid">
-      <div class="stat-card">
-        <i class="fa-solid fa-users" style="color: var(--secondary-green); font-size: 24px;"></i>
-        <h4 style="font-size: 12px; color: #777; margin: 10px 0;">TOTAL USERS</h4>
-        <p style="font-size: 22px; font-weight: bold;"><%= stats.totalUsers %></p>
+      <!-- Performance Chart -->
+      <h3 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fa-solid fa-chart-line"></i> Your
+        Performance</h3>
+      <div class="analytics-card">
+        <% if (marks && marks.length> 0) { %>
+          <div class="chart-container"><canvas id="performanceChart"></canvas></div>
+          <% } else { %>
+            <p style="text-align: center; color: #888;">Complete a quiz to see stats!</p>
+            <% } %>
       </div>
-      <div class="stat-card">
-        <i class="fa-solid fa-file-lines" style="color: var(--secondary-green); font-size: 24px;"></i>
-        <h4 style="font-size: 12px; color: #777; margin: 10px 0;">QUIZZES TAKEN</h4>
-        <p style="font-size: 22px; font-weight: bold;"><%= stats.totalQuizzes %></p>
-      </div>
-      <div class="stat-card" style="border-bottom-color: #f0ad4e; cursor: pointer;" onclick="window.location.href='/admin-dashboard'">
-        <i class="fa-solid fa-plus" style="color: #f0ad4e; font-size: 24px;"></i>
-        <h4 style="font-size: 12px; color: #777; margin: 10px 0;">MANAGE</h4>
-        <p style="font-size: 22px;">Database</p>
-      </div>
-    </div>
-    <% } else { %>
-    <h3 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fa-solid fa-chart-line"></i> Your Performance</h3>
-    <div class="analytics-card">
-      <% if (marks && marks.length > 0) { %>
-      <div class="chart-container"><canvas id="performanceChart"></canvas></div>
-      <% } else { %>
-      <p style="color: #888; padding: 20px; text-align: center;">Complete a quiz to unlock your performance chart!</p>
-      <% } %>
-    </div>
 
-    <h3 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h3>
-    <% marks.slice().reverse().forEach((attempt, index) => { %>
-    <div class="quiz-card" data-quiz-index="<%= index %>">
-      <div class="quiz-summary" onclick="toggleDetails(this)">
-        <div>
-          <span class="topic-badge"><%= attempt.topic %></span>
-          <span style="margin-left: 15px; color: #888; font-size: 12px;"><%= attempt.date %></span>
-        </div>
-        <div>
-          <span style="font-weight: 600;">Score: <%= attempt.score %>/5</span>
-          <i class="fa-solid fa-chevron-down" style="margin-left: 10px;"></i>
-        </div>
-      </div>
-      <div class="quiz-details">
-        <% attempt.results.forEach(res => { %>
-        <div style="padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
-          <p style="font-size: 14px; margin: 0 0 5px 0;"><strong>Q:</strong> <%= res.question %></p>
-          <span class="<%= res.status ? 'text-success' : 'text-danger' %>">
-            <i class="fa-solid <%= res.status ? 'fa-circle-check' : 'fa-circle-xmark' %>"></i>
-            Your Ans: <%= res.userAnswer %>
-          </span>
-          <% if (!res.status) { %>
-          <span style="display:block; font-size:13px; color:#28a745; margin-top:4px; font-weight:600;">
-            Correct: <%= res.correctAnswer %>
-          </span>
-          <% } %>
+      <!-- Recent History -->
+      <h3 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fa-solid fa-clock-rotate-left"></i> Recent
+        Activity</h3>
+      <% marks.slice().reverse().forEach((attempt, index)=> { %>
+        <div class="quiz-card">
+          <div class="quiz-summary"
+            onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'">
+            <span><span class="topic-badge">
+                <%= attempt.topic %>
+              </span>
+              <%= attempt.date %>
+            </span>
+            <span>Score: <%= attempt.score %>/5 <i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="quiz-details">
+            <% attempt.results.forEach(res=> { %>
+              <p><strong>Q:</strong>
+                <%= res.question %><br>
+                  <span class="<%= res.status ? 'text-success' : 'text-danger' %>">
+                    <%= res.userAnswer %>
+                  </span>
+              </p>
+              <% }) %>
+          </div>
         </div>
         <% }) %>
-      </div>
-    </div>
-    <% }) %>
-    <% } %>
+          <% } %>
   </div>
 
   <%- include('footer') %>
-  <script src="/js/profile.js"></script>
+    <script src="/js/profile.js"></script>
 </body>
 
 </html>
