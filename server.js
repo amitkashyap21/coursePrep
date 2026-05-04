@@ -97,7 +97,7 @@ app.get('/multiplayer', isAuthenticated, async (req, res) => {
     try {
         // Fetch unique topics from your existing Questions/Marks collection
         // Replace 'Mark' with your actual Model name for questions
-        const availableTopics = await Mark.distinct('topic'); 
+        const availableTopics = await Mark.distinct('topic');
 
         res.render('multiplayer-lobby', {
             user: req.session.user,
@@ -113,20 +113,20 @@ app.get('/', async (req, res) => {
     try {
         const studentCount = await User.countDocuments({ role: 'student' });
         const quizCount = await Mark.countDocuments();
-        
+
         // Calculate the number of live rooms
         const liveRoomCount = Object.keys(activeRooms).length;
 
         res.render('firstpage', {
-            stats: { 
-                totalUsers: studentCount, 
+            stats: {
+                totalUsers: studentCount,
                 totalQuizzes: quizCount,
                 liveRooms: liveRoomCount // Pass this new value
             }
         });
-    } catch (e) { 
+    } catch (e) {
         console.error(e);
-        res.status(500).send("Error loading home"); 
+        res.status(500).send("Error loading home");
     }
 });
 
@@ -155,7 +155,7 @@ app.get('/admin-dashboard', isAdmin, async (req, res) => {
 app.get('/profile', isAuthenticated, async (req, res) => {
     try {
         const { email, role, username } = req.session.user;
-        
+
         // Fetch full user to get backup code status
         const userDoc = await User.findOne({ email });
         const studentCount = await User.countDocuments({ role: 'student' });
@@ -194,12 +194,12 @@ app.get('/questions', isAuthenticated, async (req, res) => {
             }
 
             // Render the QUIZ page directly
-            return res.render('quiz', { 
-                questions, 
-                topic, 
-                room: room || null, // Pass room ID if it exists
-                username, 
-                email 
+            res.render('quiz', {
+                topic: topicName,
+                questions: quizQuestions,
+                room: req.query.room || null, // Capture room from URL if it exists, else null
+                user: req.query.user,
+                email: req.query.email
             });
         }
 
@@ -267,17 +267,17 @@ app.post('/register', async (req, res) => {
         await newUser.save();
 
         if (userRole !== 'admin') {
-            res.render('registration-success', { 
-                username, 
-                codes: plainCodes, 
-                isRegenerating: false 
+            res.render('registration-success', {
+                username,
+                codes: plainCodes,
+                isRegenerating: false
             });
         } else {
             res.redirect('/login');
         }
-    } catch (error) { 
+    } catch (error) {
         console.error(error);
-        res.status(500).send("Registration Error"); 
+        res.status(500).send("Registration Error");
     }
 });
 
@@ -347,7 +347,7 @@ app.post('/forgot-password', async (req, res) => {
 app.post('/api/regenerate-codes', isAuthenticated, async (req, res) => {
     try {
         if (req.session.user.role === 'admin') return res.status(403).send("Admins cannot have recovery codes.");
-        
+
         const { plainCodes, hashedCodes } = await generateRecoveryCodes();
         await User.findOneAndUpdate(
             { email: req.session.user.email },
@@ -355,9 +355,9 @@ app.post('/api/regenerate-codes', isAuthenticated, async (req, res) => {
         );
 
         // Show the new codes to the user
-        res.render('registration-success', { 
-            username: req.session.user.username, 
-            codes: plainCodes 
+        res.render('registration-success', {
+            username: req.session.user.username,
+            codes: plainCodes
         });
     } catch (e) {
         res.status(500).send("Error regenerating codes.");
@@ -378,7 +378,7 @@ app.post('/forgot-password', async (req, res) => {
         let codeIndex = -1;
         for (let i = 0; i < user.backupCodes.length; i++) {
             const backup = user.backupCodes[i];
-            
+
             // Only check codes that haven't been used yet
             if (!backup.used) {
                 const isMatch = await bcrypt.compare(code, backup.hash);
@@ -397,7 +397,7 @@ app.post('/forgot-password', async (req, res) => {
         // 4. Update Password and Mark Code as Used
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(newPassword, salt);
-        
+
         // Mark this specific code as used
         user.backupCodes[codeIndex].used = true;
         user.backupCodes[codeIndex].usedAt = new Date();
@@ -437,7 +437,7 @@ app.post('/api/regenerate-codes', async (req, res) => {
         for (let i = 0; i < 6; i++) {
             const code = crypto.randomBytes(4).toString('hex'); // 8 characters
             newPlainCodes.push(code);
-            
+
             const salt = await bcrypt.genSalt(10);
             const hash = await bcrypt.hash(code, salt);
             newHashedCodes.push({ hash, used: false });
@@ -496,29 +496,33 @@ app.get('/logout', (req, res) => {
 app.post('/submit-quiz', isAuthenticated, async (req, res) => {
     try {
         const { topic, score, results } = req.body;
-        
-        // Use req.session.user.email to ensure the marks are tied to the logged-in user
+        const now = new Date();
+
+        // 1. Generate a standardized string for the 'date' field
+        // 'en-GB' forces Day/Month/Year (e.g., 04/05/2026)
+        const ddmmyyyy = now.toLocaleDateString('en-GB'); 
+
         const newMark = new Mark({
             email: req.session.user.email,
-            topic, 
-            score, 
+            topic,
+            score,
             results,
-            createdAt: new Date() // Good for sorting history later
+            date: ddmmyyyy, 
+            createdAt: now  
         });
 
         await newMark.save();
-        
-        // Return success and perhaps the record ID for confirmation
-        res.json({ 
-            success: true, 
+
+        res.json({
+            success: true,
             message: "Assessment saved successfully",
-            markId: newMark._id 
+            markId: newMark._id
         });
-        
-        console.log(`📊 Score Saved: ${req.session.user.username} got ${score} in ${topic}`);
-    } catch (err) { 
+
+        console.log(`📊 Score Saved: ${req.session.user.username} - Date: ${ddmmyyyy}`);
+    } catch (err) {
         console.error("Save Error:", err);
-        res.status(500).json({ success: false, message: "Server error while saving score" }); 
+        res.status(500).json({ success: false, message: "Server error" });
     }
 });
 
@@ -533,6 +537,32 @@ app.get('/api/user-stats', isAuthenticated, async (req, res) => {
             averages: stats.map(s => (s.avgScore * 20).toFixed(2))
         });
     } catch (e) { res.status(500).json({ error: "Stat error" }); }
+});
+
+app.get('/api/user-activity', async (req, res) => {
+    try {
+        const activities = await Mark.find({ email: req.session.user.email });
+        const activityMap = {};
+
+        activities.forEach(act => {
+            // ONLY use createdAt. If it's missing, this specific record is old.
+            if (act.createdAt) {
+                const d = new Date(act.createdAt);
+                
+                // Get the local date parts
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                
+                const dateKey = `${y}-${m}-${day}`; // Always YYYY-MM-DD
+                activityMap[dateKey] = (activityMap[dateKey] || 0) + 1;
+            }
+        });
+
+        res.json(activityMap);
+    } catch (err) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 
 // =====================
@@ -570,7 +600,7 @@ app.post('/api/admin/upload-questions', isAdmin, upload.single('jsonFile'), asyn
         fs.unlinkSync(req.file.path);
         res.send(`<script>alert("Bulk Upload Success!"); window.location.href="/admin-dashboard";</script>`);
     } catch (e) {
-        if (req.file) fs.unlinkSync(req.file.path); 
+        if (req.file) fs.unlinkSync(req.file.path);
         res.status(400).send("Error: Invalid JSON format.");
     }
 });
