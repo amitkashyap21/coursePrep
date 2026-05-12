@@ -182,28 +182,29 @@ app.get('/profile', isAuthenticated, async (req, res) => {
 app.get('/questions', isAuthenticated, async (req, res) => {
     try {
         const { username, email } = req.session.user;
-        const { topic, room } = req.query; // Get topic and room from URL
+        const { topic, room } = req.query;
 
-        // CASE 1: Topic is selected (Multiplayer Start or Solo selection)
+        // CASE 1: Topic is selected
         if (topic) {
-            // Fetch questions specifically for the selected topic
+            // You defined 'questions' here
             const questions = await Question.find({ topic: topic });
 
             if (!questions || questions.length === 0) {
                 return res.status(404).send("No questions found for this topic.");
             }
 
-            // Render the QUIZ page directly
+            // Render the QUIZ page
             res.render('quiz', {
-                topic: topicName,
-                questions: quizQuestions,
-                room: req.query.room || null, // Capture room from URL if it exists, else null
-                user: req.query.user,
-                email: req.query.email
+                topic: topic,
+                questions: questions,
+                room: room || null,
+                user: username,
+                email: email
             });
+            return; // Important: stop execution after rendering
         }
 
-        // CASE 2: No topic selected (Show selection page)
+        // CASE 2: No topic selected
         const topics = await Question.distinct('topic');
         res.render('topics', { topics, username, email });
 

@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!confirm("Permanently delete account?")) return;
             const email = dataContainer.getAttribute('data-user-email');
             const res = await fetch('/api/delete-account', {
-                method: 'POST',
+                method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
             });

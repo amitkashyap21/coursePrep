@@ -45,13 +45,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let score = 0;
             let results = [];
+
             document.querySelectorAll('.question-card').forEach((block) => {
                 const selected = block.querySelector('input[type="radio"]:checked');
                 const options = Array.from(block.querySelectorAll('input[type="radio"]')).map(i => i.value.trim());
                 const correctIdx = parseInt(selected.getAttribute('data-correct-index'));
-                const isCorrect = (selected.value.trim() === options[correctIdx]);
+                const userAnswer = selected.value.trim();
+                const correctAnswer = options[correctIdx];
+                const isCorrect = (userAnswer === correctAnswer);
+
                 if (isCorrect) score++;
-                results.push({ question: selected.getAttribute('data-question-text'), status: isCorrect });
+                results.push({
+                    question: selected.getAttribute('data-question-text'),
+                    status: isCorrect,
+                    userAnswer: userAnswer,
+                    correctAnswer: correctAnswer
+                });
             });
 
             try {
