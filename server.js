@@ -7,6 +7,7 @@ const multer = require('multer');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // Import Models
 const User = require('./models/User');
@@ -182,28 +183,29 @@ app.get('/profile', isAuthenticated, async (req, res) => {
 app.get('/questions', isAuthenticated, async (req, res) => {
     try {
         const { username, email } = req.session.user;
-        const { topic, room } = req.query; // Get topic and room from URL
+        const { topic, room } = req.query;
 
-        // CASE 1: Topic is selected (Multiplayer Start or Solo selection)
+        // CASE 1: Topic is selected
         if (topic) {
-            // Fetch questions specifically for the selected topic
+            // You defined 'questions' here
             const questions = await Question.find({ topic: topic });
 
             if (!questions || questions.length === 0) {
                 return res.status(404).send("No questions found for this topic.");
             }
 
-            // Render the QUIZ page directly
+            // Render the QUIZ page
             res.render('quiz', {
-                topic: topicName,
-                questions: quizQuestions,
-                room: req.query.room || null, // Capture room from URL if it exists, else null
-                user: req.query.user,
-                email: req.query.email
+                topic: topic,
+                questions: questions,
+                room: room || null,
+                user: username,
+                email: email
             });
+            return; // Important: stop execution after rendering
         }
 
-        // CASE 2: No topic selected (Show selection page)
+        // CASE 2: No topic selected
         const topics = await Question.distinct('topic');
         res.render('topics', { topics, username, email });
 
@@ -224,6 +226,47 @@ app.get('/quiz/:topic', isAuthenticated, async (req, res) => {
         if (shuffled.length === 0) return res.redirect('/questions');
         res.render('quiz', { topic, questions: shuffled, username, email });
     } catch (e) { res.status(500).send("Error starting quiz."); }
+});
+
+app.post('/ai-ask', async (req, res) => {
+    try {
+        const { prompt, topic, history = [] } = req.body;
+        const apiKey = process.env.GEMINI_API_KEY;
+
+        const contents = history.map(msg => ({
+            role: msg.role === 'user' ? 'user' : 'model',
+            parts: [{ text: msg.content }]
+        }));
+
+        contents.push({
+            role: "user",
+            parts: [{ text: `Topic: ${topic}. Instruction: Provide a complete answer of approximately 150-200 words. Do not stop until the sentence is finished. Question: ${prompt}` }]
+        });
+
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: contents,
+                generationConfig: {
+                    maxOutputTokens: 1024, // High ceiling to prevent cutoffs
+                    temperature: 0.7
+                }
+            })
+        });
+
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0].content) {
+            res.json({ answer: data.candidates[0].content.parts[0].text });
+        } else {
+            res.json({ answer: "I'm sorry, I couldn't finish that. Please try again." });
+        }
+    } catch (error) {
+        res.status(500).json({ answer: "Server Error" });
+    }
 });
 
 // =====================
@@ -500,15 +543,15 @@ app.post('/submit-quiz', isAuthenticated, async (req, res) => {
 
         // 1. Generate a standardized string for the 'date' field
         // 'en-GB' forces Day/Month/Year (e.g., 04/05/2026)
-        const ddmmyyyy = now.toLocaleDateString('en-GB'); 
+        const ddmmyyyy = now.toLocaleDateString('en-GB');
 
         const newMark = new Mark({
             email: req.session.user.email,
             topic,
             score,
             results,
-            date: ddmmyyyy, 
-            createdAt: now  
+            date: ddmmyyyy,
+            createdAt: now
         });
 
         await newMark.save();
@@ -548,12 +591,12 @@ app.get('/api/user-activity', async (req, res) => {
             // ONLY use createdAt. If it's missing, this specific record is old.
             if (act.createdAt) {
                 const d = new Date(act.createdAt);
-                
+
                 // Get the local date parts
                 const y = d.getFullYear();
                 const m = String(d.getMonth() + 1).padStart(2, '0');
                 const day = String(d.getDate()).padStart(2, '0');
-                
+
                 const dateKey = `${y}-${m}-${day}`; // Always YYYY-MM-DD
                 activityMap[dateKey] = (activityMap[dateKey] || 0) + 1;
             }

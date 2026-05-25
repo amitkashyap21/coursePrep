@@ -8,10 +8,14 @@
                 --primary-dark: #0f3d2e;
                 --secondary-green: #1b5e4b;
                 --bg-light: #f4f7f6;
+                --text-main: #333;
             }
 
+            /* General Layout */
             body {
                 background-color: var(--bg-light);
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                color: var(--text-main);
             }
 
             .quiz-container {
@@ -20,12 +24,13 @@
                 padding: 0 20px;
             }
 
+            /* Question Cards */
             .question-card {
                 background: white;
                 padding: 30px;
                 border-radius: 15px;
                 margin-bottom: 20px;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
                 border-left: 5px solid var(--secondary-green);
             }
 
@@ -36,6 +41,12 @@
                 border: 1.5px solid #eee;
                 border-radius: 8px;
                 cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .option-label:hover {
+                background-color: #f9f9f9;
+                border-color: var(--secondary-green);
             }
 
             .btn-submit {
@@ -50,6 +61,89 @@
 
             .hidden {
                 display: none;
+            }
+
+            /* --- Chat Message Formatting (The Fix) --- */
+
+            .user-msg,
+            .ai-msg {
+                margin-bottom: 18px;
+                line-height: 1.6;
+                padding: 10px;
+                border-radius: 8px;
+            }
+
+            .ai-msg {
+                background-color: #f0f7f4;
+                /* Light green tint for AI */
+            }
+
+            /* This is the label (You: or AI:) */
+            .msg-label {
+                color: var(--secondary-green);
+                font-weight: bold;
+                margin-right: 6px;
+                display: inline;
+            }
+
+            /* This container holds the Markdown output */
+            .msg-content {
+                display: inline;
+            }
+
+            /* CRITICAL: Force Markdown paragraphs to stay on the same line as the label */
+            .msg-content p {
+                display: inline;
+                margin: 0;
+            }
+
+            /* Ensure lists still look like lists even when inline */
+            .msg-content ul,
+            .msg-content ol {
+                display: block;
+                margin-top: 10px;
+                padding-left: 25px;
+            }
+
+            .msg-content li {
+                margin-bottom: 5px;
+            }
+
+            /* --- Typing Animation --- */
+            .typing {
+                display: inline-flex !important;
+                vertical-align: middle;
+                gap: 4px;
+                margin-left: 5px;
+            }
+
+            .dot {
+                width: 6px;
+                height: 6px;
+                background: var(--secondary-green);
+                border-radius: 50%;
+                animation: blink 1.4s infinite both;
+            }
+
+            .dot:nth-child(2) {
+                animation-delay: 0.2s;
+            }
+
+            .dot:nth-child(3) {
+                animation-delay: 0.4s;
+            }
+
+            @keyframes blink {
+
+                0%,
+                80%,
+                100% {
+                    opacity: 0;
+                }
+
+                40% {
+                    opacity: 1;
+                }
             }
         </style>
 </head>
@@ -85,8 +179,54 @@
         </form>
     </div>
 
+    <div id="ai-chat-container"
+        style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; font-family: 'Segoe UI', sans-serif;">
+        <button id="ai-toggle-btn"
+            style="background: #1b5e4b; color: white; border: none; border-radius: 50%; width: 60px; height: 60px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-size: 24px; transition: transform 0.3s;">
+            🤖
+        </button>
+
+        <div id="ai-chat-window"
+            style="display: none; position: absolute; bottom: 75px; right: 0; width: 320px; height: 450px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); flex-direction: column; overflow: hidden; border: 1px solid #eee;">
+            <div
+                style="background: #0f3d2e; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: bold;">AI Study Tutor</span>
+                <div>
+                    <button onclick="resetChat()"
+                        style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-right: 5px;">Reset</button>
+                    <button id="close-chat"
+                        style="background: none; border: none; color: white; cursor: pointer; font-size: 18px;">&times;</button>
+                </div>
+            </div>
+
+            <div id="ai-message-list"
+                style="flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px;">
+                <div
+                    style="background: #e1ede9; padding: 10px; border-radius: 10px; font-size: 13px; align-self: flex-start; max-width: 85%;">
+                    Hello! I'm your AI Tutor. Ask me anything about this quiz!
+                </div>
+            </div>
+
+            <div style="padding: 15px; border-top: 1px solid #eee; background: white;">
+                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    <input type="text" id="ai-user-input" placeholder="Ask a question..."
+                        style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; outline: none;">
+                    <button id="ai-send-btn"
+                        style="background: #1b5e4b; color: white; border: none; border-radius: 5px; padding: 8px 12px; cursor: pointer;">Send</button>
+                </div>
+                <button onclick="exportChatToPDF()"
+                    style="width: 100%; background: #f0f0f0; border: none; padding: 6px; border-radius: 5px; font-size: 11px; cursor: pointer; color: #555;">
+                    Download Conversation (PDF) 📄
+                </button>
+            </div>
+        </div>
+    </div>
+
     <%- include('footer') %>
         <script src="/socket.io/socket.io.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
         <script src="/js/quiz.js"></script>
 </body>
 
